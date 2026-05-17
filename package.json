@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/check-env.mjs && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "supabase db push --yes",
+    "db:verify": "node scripts/verify-migrations.mjs",
+    "db:migrate": "bash scripts/db-migrate.sh",
+    "db:repair-manual": "bash scripts/db-repair-manual.sh",
+    "test": "bash scripts/test.sh",
+    "test:watch": "bash scripts/test.sh --watch"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -20,9 +26,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4",
+    "ws": "^8.20.1"
   }
 }

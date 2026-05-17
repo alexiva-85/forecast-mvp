@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/app/actions/auth";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export async function Header() {
   const supabase = await createClient();
@@ -51,14 +51,7 @@ export async function Header() {
                   maximumFractionDigits: 0,
                 })}
               </span>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="text-zinc-500 transition-colors hover:text-white"
-                >
-                  Выйти
-                </button>
-              </form>
+              <SignOutButton />
             </>
           ) : (
             <Link

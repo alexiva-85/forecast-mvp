@@ -12,7 +12,21 @@ export interface Market {
   status: MarketStatus;
   resolved_side: OutcomeSide | null;
   closes_at: string | null;
+  resolution_rules: string | null;
+  resolution_checklist: string[];
+  tags: string[];
+  is_sandbox: boolean;
   created_at: string;
+}
+
+export function parseTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((t): t is string => typeof t === "string");
+}
+
+export function parseChecklist(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is string => typeof item === "string");
 }
 
 export interface Profile {
@@ -41,6 +55,7 @@ export interface Trade {
   side: OutcomeSide;
   price: number;
   size: number;
+  fee_amount?: number;
   buyer_id: string;
   seller_id: string;
   created_at: string;

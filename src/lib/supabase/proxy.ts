@@ -25,6 +25,7 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  // Обновляет JWT в cookies; без этого RSC может не видеть сессию после входа.
   await supabase.auth.getUser();
 
   return supabaseResponse;

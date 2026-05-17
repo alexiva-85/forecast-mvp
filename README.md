@@ -9,6 +9,7 @@
 | [docs/PROJECT.md](docs/PROJECT.md) | Видение, блоки разработки, статусы, правила |
 | [docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md) | Реестр OSS и что переиспользовать |
 | [docs/RESEARCH.md](docs/RESEARCH.md) | Как мониторить новую информацию |
+| [docs/ADMIN.md](docs/ADMIN.md) | Админка: разделы и backlog после MVP |
 | [AGENTS.md](AGENTS.md) | Краткие инструкции для агента в Cursor |
 
 | | |
@@ -86,6 +87,7 @@
 | Торговля | Лимитные ордера buy/sell на Да или Нет |
 | Портфель | Баланс и открытые позиции |
 | Резолв | Админ: исход Да/Нет → пользователь «Получить выплату» |
+| Админка | Обзор, рынки, мастер создания, очередь резолва, Gamma, настройки (`/admin`) |
 | Auth | Email + пароль (Supabase Auth) |
 
 ### Тестовые рынки (seed)
@@ -104,7 +106,7 @@ forecast-mvp/
 │   ├── page.tsx          # Список рынков
 │   ├── market/[slug]/    # Рынок + торговля
 │   ├── portfolio/        # Портфель
-│   ├── admin/            # Резолв рынков
+│   ├── admin/            # Операторская панель (обзор, рынки, резолв, идеи)
 │   └── login/            # Вход / регистрация
 ├── src/components/       # UI-компоненты
 ├── src/lib/              # Supabase-клиенты, расчёт цен
@@ -161,10 +163,33 @@ cp .env.example .env.local
 npm install && npm run dev
 ```
 
-### Первичная настройка БД (один раз)
+### Первичная настройка БД
 
-1. Supabase → SQL Editor → `supabase/migrations/001_initial.sql`  
-2. Затем `supabase/seed.sql`  
+**Рекомендуется — через Supabase CLI** (автоматические миграции):
+
+```bash
+cp .env.example .env.local
+# Заполните NEXT_PUBLIC_SUPABASE_* и SUPABASE_PROJECT_REF
+
+supabase login
+npm run db:migrate    # link + push + verify
+# seed (один раз): Supabase SQL Editor → supabase/seed.sql
+```
+
+| Команда | Назначение |
+|---------|------------|
+| `npm run db:migrate` | Применить все миграции и проверить |
+| `npm run db:push` | Только push (проект уже linked) |
+| `npm run db:verify` | Проверить RPC и колонки на удалённой БД |
+| `npm run db:repair-manual` | Если 001/002 применяли вручную в SQL Editor |
+| `npm test` | Интеграционные тесты RPC и RLS (`supabase login` или `SUPABASE_SERVICE_ROLE_KEY` в `.env.local`) |
+
+Миграции применяются **только локально** (`npm run db:migrate`). Секреты из `.env.local` в git не попадают (файл в `.gitignore`).
+
+**После миграций:** `npm run dev` — запуск приложения. Seed (один раз): SQL Editor → `supabase/seed.sql`.
+
+**Вручную (legacy):** SQL Editor → файлы из `supabase/migrations/` по порядку, затем `seed.sql`.
+
 3. Authentication → Email → отключить **Confirm email** (для теста)
 
 ### Сделать себя админом
@@ -192,7 +217,7 @@ where id = 'ВАШ_UUID_ИЗ_auth.users';
 - подписка / Pro-аналитика;  
 - маркет-мейкинг (spread) при собственной ликвидности.
 
-В MVP комиссия **не включена** — чтобы упростить тест.
+В MVP комиссия **1% с оборота** сделки (50/50 покупатель и продавец), настраивается в `platform_settings`.
 
 ---
 

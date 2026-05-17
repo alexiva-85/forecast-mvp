@@ -83,10 +83,10 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 |----|--------|--------|
 | B1 | Лимитный матчинг в PostgreSQL | `done` |
 | B2 | Отображение стакана и последних сделок | `done` |
-| B3 | Отмена ордеров | `planned` |
+| B3 | Отмена ордеров | `done` |
 | B4 | Market-ордера (FOK/IOC) | `planned` |
-| B5 | WebSocket / Realtime обновление стакана | `planned` |
-| B6 | Комиссия платформы (% с оборота) | `planned` |
+| B5 | WebSocket / Realtime обновление стакана | `done` |
+| B6 | Комиссия платформы (% с оборота) | `done` |
 | B7 | Neg-risk / мульти-исходные рынки | `planned` |
 
 ### Блок C — Рынки и контент
@@ -94,11 +94,14 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | ID | Задача | Статус |
 |----|--------|--------|
 | C1 | Seed SQL вручную | `done` |
-| C2 | Админка: создать рынок (форма) | `planned` |
-| C3 | Правила резолва в UI (текст + чеклист) | `planned` |
-| C4 | Закрытие торгов до даты события | `planned` |
-| C5 | Категории, теги, поиск | `planned` |
-| C6 | Парсинг идей с Gamma API (read-only) | `planned` |
+| C2 | Админка: создать рынок (форма) | `done` |
+| C3 | Правила резолва в UI (текст + чеклист) | `done` |
+| C4 | Закрытие торгов до даты события | `done` |
+| C5 | Категории, теги, поиск | `done` |
+| C6 | Парсинг идей с Gamma API (read-only) | `done` |
+| C7 | Админка v1: разделы, очередь резолва, sandbox, мастер | `done` |
+
+Подробный backlog админки после MVP: [ADMIN.md](./ADMIN.md).
 
 ### Блок D — Пользователи и доверие
 
@@ -136,9 +139,9 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 
 | ID | Задача | Статус |
 |----|--------|--------|
-| G1 | Тесты RPC `place_order` / `redeem` | `planned` |
-| G2 | Rate limits, anti-abuse | `planned` |
-| G3 | Аудит RLS и SECURITY DEFINER | `planned` |
+| G1 | Тесты RPC `place_order` / `redeem` | `done` |
+| G2 | Rate limits, anti-abuse | `done` |
+| G3 | Аудит RLS и SECURITY DEFINER | `done` |
 | G4 | Мониторинг (Sentry, логи Vercel) | `planned` |
 | G5 | Аудит смарт-контрактов (перед mainnet) | `planned` |
 
@@ -189,6 +192,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 |--------|----------|
 | GitHub | `alexiva-85/forecast-mvp` |
 | Supabase org | `emzovmecbkanpjkoqmku` |
+| Supabase project ref | `mookbnjtlqqljhlizipb` |
 | Vercel team | `aleksandr-ivashchenkos-projects` |
 | Локальный путь | `~/projects/forecast-mvp` |
 
@@ -221,4 +225,4 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 
 ---
 
-*Последнее обновление структуры документа: 2026-05-16*
+*Последнее обновление структуры документа: 2026-05-17*

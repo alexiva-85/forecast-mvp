@@ -11,8 +11,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Обязательно перед работой
 
 1. **[docs/PROJECT.md](docs/PROJECT.md)** — какой продукт строим, блоки разработки, статусы, правила.
-2. **[docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md)** — что брать из open source, что писать самим.
-3. **[docs/RESEARCH.md](docs/RESEARCH.md)** — когда проверять новую информацию (перед E5/E6 и раз в 2–4 недели).
+2. **[docs/ADMIN.md](docs/ADMIN.md)** — админка: текущие разделы и backlog после MVP.
+3. **[docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md)** — что брать из open source, что писать самим.
+4. **[docs/RESEARCH.md](docs/RESEARCH.md)** — когда проверять новую информацию (перед E5/E6 и раз в 2–4 недели).
 
 Публичное описание: [README.md](README.md).
 
@@ -38,4 +39,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Next.js 16 (App Router) · Supabase · TypeScript · Tailwind · Vercel
 
-Торговая логика MVP: RPC `place_order`, `redeem_positions` в `supabase/migrations/001_initial.sql`.
+Торговая логика MVP: RPC в `supabase/migrations/`. Применение: `npm run db:migrate` (не SQL Editor вручную).

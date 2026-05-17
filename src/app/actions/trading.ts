@@ -37,6 +37,32 @@ export async function placeOrder(formData: FormData) {
   return { success: true };
 }
 
+export async function cancelOrder(orderId: string, slug?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Войдите в аккаунт" };
+  }
+
+  const { error } = await supabase.rpc("cancel_order", {
+    p_order_id: orderId,
+  });
+
+  if (error) {
+    return { error: mapDbError(error.message) };
+  }
+
+  revalidatePath("/portfolio");
+  if (slug) {
+    revalidatePath(`/market/${slug}`);
+  }
+  revalidatePath("/");
+  return { success: true };
+}
+
 export async function redeemPositions(marketId: string, slug: string) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("redeem_positions", {
@@ -53,27 +79,6 @@ export async function redeemPositions(marketId: string, slug: string) {
   return { success: true, payout: data as number };
 }
 
-export async function adminResolveMarket(
-  marketId: string,
-  side: "yes" | "no",
-  slug: string,
-) {
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("admin_resolve_market", {
-    p_market_id: marketId,
-    p_side: side,
-  });
-
-  if (error) {
-    return { error: mapDbError(error.message) };
-  }
-
-  revalidatePath("/");
-  revalidatePath(`/market/${slug}`);
-  revalidatePath("/admin");
-  return { success: true };
-}
-
 function mapDbError(message: string): string {
   if (message.includes("Insufficient balance")) {
     return "Недостаточно тестовых средств";
@@ -86,6 +91,24 @@ function mapDbError(message: string): string {
   }
   if (message.includes("Not authenticated")) {
     return "Войдите в аккаунт";
+  }
+  if (message.includes("Not your order")) {
+    return "Это не ваш ордер";
+  }
+  if (message.includes("Order is not open")) {
+    return "Ордер уже закрыт";
+  }
+  if (message.includes("Order not found")) {
+    return "Ордер не найден";
+  }
+  if (message.includes("Trading closed")) {
+    return "Торги закрыты по расписанию";
+  }
+  if (message.includes("Rate limit exceeded")) {
+    return "Слишком много запросов — подождите минуту";
+  }
+  if (message.includes("Order size too large")) {
+    return "Слишком большой размер ордера (макс. 10 000 долей)";
   }
   return message;
 }

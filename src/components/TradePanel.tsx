@@ -4,17 +4,24 @@ import { useState, useTransition } from "react";
 import { placeOrder, redeemPositions } from "@/app/actions/trading";
 import type { MarketWithPrice } from "@/lib/types";
 import { formatPrice } from "@/lib/markets";
+import {
+  estimateSideFee,
+  estimateTradeFee,
+  formatFeePercent,
+} from "@/lib/platform";
 
 export function TradePanel({
   market,
   userId,
   yesShares,
   noShares,
+  tradeFeeRate,
 }: {
   market: MarketWithPrice;
   userId: string | null;
   yesShares: number;
   noShares: number;
+  tradeFeeRate: number;
 }) {
   const [side, setSide] = useState<"yes" | "no">("yes");
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
@@ -27,6 +34,9 @@ export function TradePanel({
 
   const isOpen = market.status === "open";
   const isResolved = market.status === "resolved";
+  const notional = price * size;
+  const totalFee = estimateTradeFee(notional, tradeFeeRate);
+  const sideFee = estimateSideFee(notional, tradeFeeRate);
 
   function onSideChange(next: "yes" | "no") {
     setSide(next);
@@ -90,7 +100,9 @@ export function TradePanel({
   if (!isOpen) {
     return (
       <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 text-sm text-zinc-500">
-        Торги закрыты
+        {market.status === "closed"
+          ? "Торги закрыты — новые заявки не принимаются"
+          : "Торги недоступны"}
       </div>
     );
   }
@@ -181,6 +193,10 @@ export function TradePanel({
           <p className="text-xs text-zinc-500">
             {direction === "buy" ? "Макс. списание" : "Ожидаемый доход"}: $
             {(price * size).toFixed(2)}
+          </p>
+          <p className="text-xs text-zinc-600">
+            Комиссия {formatFeePercent(tradeFeeRate)} с оборота при исполнении
+            (ваша доля ≈ ${sideFee.toFixed(2)}, всего ${totalFee.toFixed(2)})
           </p>
           <button
             type="submit"

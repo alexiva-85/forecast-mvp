@@ -1,22 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { getMarkets } from "@/lib/markets";
+import { getMarkets, getPopularTags } from "@/lib/markets";
 import { MarketCard } from "@/components/MarketCard";
-import Link from "next/link";
+import { MarketCatalogFilters } from "@/components/MarketCatalogFilters";
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string; tag?: string }>;
 }) {
-  const { category = "all" } = await searchParams;
+  const { category = "all", q = "", tag = "" } = await searchParams;
   const supabase = await createClient();
-  const markets = await getMarkets(supabase, category);
 
-  const tabs = [
-    { id: "all", label: "Все" },
-    { id: "sport", label: "Спорт" },
-    { id: "crypto", label: "Крипто" },
-  ];
+  const [markets, popularTags] = await Promise.all([
+    getMarkets(supabase, { category, q, tag }),
+    getPopularTags(supabase),
+  ]);
+
+  const hasFilters = Boolean(q.trim() || tag);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -29,36 +29,30 @@ export default async function HomePage({
         </p>
       </div>
 
-      <div className="mb-6 flex gap-2">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.id}
-            href={tab.id === "all" ? "/" : `/?category=${tab.id}`}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-              category === tab.id
-                ? "bg-white text-zinc-900"
-                : "bg-zinc-900 text-zinc-400 hover:text-white"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </div>
+      <MarketCatalogFilters
+        category={category}
+        q={q}
+        tag={tag}
+        popularTags={popularTags}
+      />
 
-      {markets.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
-          <p>Рынки не найдены.</p>
-          <p className="mt-2 text-sm">
-            Выполните миграцию и seed в Supabase (см. README).
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {markets.map((m) => (
-            <MarketCard key={m.id} market={m} />
-          ))}
-        </div>
-      )}
+      <div className="mt-6">
+        {markets.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-zinc-800 p-12 text-center text-zinc-500">
+            <p>
+              {hasFilters
+                ? "Ничего не найдено — измените запрос или сбросьте фильтры"
+                : "Рынки не найдены"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {markets.map((m) => (
+              <MarketCard key={m.id} market={m} activeTag={tag} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

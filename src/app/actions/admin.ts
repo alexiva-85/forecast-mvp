@@ -1,0 +1,143 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import type { MarketCategory } from "@/lib/types";
+
+export async function createMarket(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Войдите в аккаунт" };
+  }
+
+  const slug = (formData.get("slug") as string).trim().toLowerCase();
+  const title = (formData.get("title") as string).trim();
+  const description = (formData.get("description") as string).trim();
+  const category = formData.get("category") as MarketCategory;
+  const closesAtRaw = (formData.get("closesAt") as string).trim();
+  const resolutionRules = (formData.get("resolutionRules") as string).trim();
+  const checklistRaw = (formData.get("resolutionChecklist") as string).trim();
+  const tagsRaw = (formData.get("tags") as string).trim();
+
+  const checklist = checklistRaw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const tags = tagsRaw
+    .split(/[,;\n]/)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!slug || !title || !resolutionRules || checklist.length === 0) {
+    return { error: "Заполните обязательные поля" };
+  }
+
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
+    return { error: "Slug: только латиница, цифры и дефисы" };
+  }
+
+  const closesAt = closesAtRaw
+    ? new Date(closesAtRaw).toISOString()
+    : null;
+
+  const isSandbox = formData.get("isSandbox") === "true";
+
+  const { data, error } = await supabase.rpc("admin_create_market", {
+    p_slug: slug,
+    p_title: title,
+    p_description: description || null,
+    p_category: category,
+    p_closes_at: closesAt,
+    p_resolution_rules: resolutionRules,
+    p_resolution_checklist: checklist,
+    p_tags: tags,
+    p_is_sandbox: isSandbox,
+  });
+
+  if (error) {
+    return { error: mapAdminError(error.message) };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath(`/market/${slug}`);
+  return { success: true, marketId: data as string, slug };
+}
+
+export async function adminResolveMarket(
+  marketId: string,
+  side: "yes" | "no",
+  slug: string,
+) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_resolve_market", {
+    p_market_id: marketId,
+    p_side: side,
+  });
+
+  if (error) {
+    return { error: mapAdminError(error.message) };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/market/${slug}`);
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+function mapAdminError(message: string): string {
+  if (message.includes("Admin only")) {
+    return "Только для администратора";
+  }
+  if (message.includes("Invalid slug")) {
+    return "Некорректный slug";
+  }
+  if (message.includes("Title required")) {
+    return "Укажите название рынка";
+  }
+  if (message.includes("Resolution rules required")) {
+    return "Укажите правила резолва";
+  }
+  if (message.includes("Resolution checklist required")) {
+    return "Добавьте хотя бы один пункт чеклиста";
+  }
+  if (message.includes("duplicate key") || message.includes("markets_slug_key")) {
+    return "Рынок с таким slug уже существует";
+  }
+  if (message.includes("Too many tags")) {
+    return "Не более 8 тегов";
+  }
+  if (message.includes("Market must be closed")) {
+    return "Сначала закройте торги — резолв только для закрытых рынков";
+  }
+  if (message.includes("Market not found")) {
+    return "Рынок не найден";
+  }
+  return message;
+}
+
+export async function setTradeFeeRate(ratePercent: number) {
+  const supabase = await createClient();
+  const rate = ratePercent / 100;
+
+  if (!Number.isFinite(rate) || rate < 0 || rate > 5) {
+    return { error: "Ставка от 0% до 5%" };
+  }
+
+  const { error } = await supabase.rpc("admin_set_trade_fee_rate", {
+    p_rate: rate,
+  });
+
+  if (error) {
+    return { error: mapAdminError(error.message) };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/settings");
+  return { success: true };
+}

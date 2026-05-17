@@ -1,13 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { OpenOrdersList } from "@/components/OpenOrdersList";
+
 export default async function PortfolioPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) redirect("/login?next=/portfolio");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -21,6 +23,13 @@ export default async function PortfolioPage() {
     .eq("user_id", user.id)
     .gt("shares", 0);
 
+  const { data: openOrders } = await supabase
+    .from("orders")
+    .select("*, markets(slug, title)")
+    .eq("user_id", user.id)
+    .eq("status", "open")
+    .order("created_at", { ascending: false });
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-2xl font-semibold text-white">Портфель</h1>
@@ -28,6 +37,16 @@ export default async function PortfolioPage() {
         ${Number(profile?.balance ?? 0).toLocaleString("ru-RU", { maximumFractionDigits: 2 })}
       </p>
       <p className="text-sm text-zinc-500">Доступный тестовый баланс</p>
+
+      {openOrders && openOrders.length > 0 && (
+        <div className="mt-10">
+          <OpenOrdersList
+            userId={user.id}
+            initialOrders={openOrders}
+            showMarket
+          />
+        </div>
+      )}
 
       <h2 className="mt-10 mb-4 text-sm font-medium text-zinc-400">Позиции</h2>
       {!positions?.length ? (
