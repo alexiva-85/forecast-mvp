@@ -231,7 +231,7 @@ where id = 'ВАШ_UUID_ИЗ_auth.users';
    или в браузере:  
    `https://forecast-mvp-pied.vercel.app/api/sentry-test?token=ВАШ_ТОКЕН`  
    → HTTP 500. В **Issues** — `Forecast Sentry acceptance test (server API)`.
-4. Без токена или с неверным токеном оба URL отдают **404** (событий в Sentry нет).
+4. Без токена или с неверным токеном: **404** `{"error":"Not found"}` (событий в Sentry нет). С валидным токеном API отдаёт **500** JSON с `"sentry":"captured"`.
 5. Performance (опционально): транзакции могут сэмплироваться (~10% в production).
 
 ---
