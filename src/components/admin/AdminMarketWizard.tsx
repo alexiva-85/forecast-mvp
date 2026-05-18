@@ -125,7 +125,7 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     formData.set("tags", tags);
     formData.set("resolutionRules", resolutionRules);
     formData.set("resolutionChecklist", resolutionChecklist);
-    if (isSandbox) formData.set("isSandbox", "true");
+    if (isSandbox || isMultiOutcome) formData.set("isSandbox", "true");
 
     if (isMultiOutcome) {
       const lines = outcomeLabels
@@ -233,7 +233,11 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
             <input
               type="checkbox"
               checked={isMultiOutcome}
-              onChange={(e) => setIsMultiOutcome(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setIsMultiOutcome(checked);
+                if (checked) setIsSandbox(true);
+              }}
               className="rounded border-zinc-600"
             />
             Мульти-исход (3–8 вариантов, sandbox рекомендуется)

@@ -22,8 +22,8 @@ export function AdminGrantTestShares() {
     <article className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
       <h3 className="font-medium text-amber-200/90">Тестовые доли (sandbox)</h3>
       <p className="mt-1 text-sm text-zinc-500">
-        Начисление долей по исходу для проверки продажи и redeem. Только рынки с
-        флагом sandbox.
+        Начисление долей по исходу для проверки продажи и redeem. Рынок
+        автоматически станет тестовым (sandbox) и скроется из публичного каталога.
       </p>
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
         <label className="block text-sm">

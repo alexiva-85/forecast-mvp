@@ -216,9 +216,6 @@ function mapAdminError(message: string): string {
   if (message.includes("User not found")) {
     return "Пользователь с таким email не найден";
   }
-  if (message.includes("Only sandbox markets")) {
-    return "Только для тестовых рынков (sandbox)";
-  }
   if (message.includes("Invalid share amount")) {
     return "Некорректное количество долей";
   }
