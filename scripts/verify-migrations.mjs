@@ -213,6 +213,16 @@ const checks = [
     },
   },
   {
+    name: "B7 — market_outcomes",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/market_outcomes?select=outcome_key,label&limit=1`,
+        { headers: headers() },
+      );
+      return res.ok;
+    },
+  },
+  {
     name: "C7 — admin_resolve closed only",
     async run() {
       const res = await rpc("admin_resolve_market", {

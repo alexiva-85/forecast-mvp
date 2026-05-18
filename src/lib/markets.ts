@@ -1,3 +1,8 @@
+import {
+  getMarketOutcomes,
+  getOutcomePrice,
+  getOutcomePrices,
+} from "@/lib/outcomes";
 import type { Market, MarketStatus, MarketWithPrice, Trade } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -67,13 +72,20 @@ export async function getMarkets(
   if (error) throw error;
 
   const withPrices = await Promise.all(
-    (markets as Market[]).map(async (m) => ({
-      ...m,
-      yes_price: await getYesPrice(supabase, m.id),
-    })),
+    (markets as Market[]).map(async (m) => enrichMarketWithPrices(supabase, m)),
   );
 
   return withPrices;
+}
+
+async function enrichMarketWithPrices(
+  supabase: SupabaseClient,
+  market: Market,
+): Promise<MarketWithPrice> {
+  const outcomes = await getMarketOutcomes(supabase, market.id);
+  const outcome_prices = await getOutcomePrices(supabase, market.id, outcomes);
+  const yes_price = outcome_prices.yes ?? (await getYesPrice(supabase, market.id));
+  return { ...market, outcomes, outcome_prices, yes_price };
 }
 
 export async function getMarketBySlug(
@@ -92,10 +104,7 @@ export async function getMarketBySlug(
   if (!data) return null;
 
   const market = data as Market;
-  return {
-    ...market,
-    yes_price: await getYesPrice(supabase, market.id),
-  };
+  return enrichMarketWithPrices(supabase, market);
 }
 
 export async function getYesPrice(

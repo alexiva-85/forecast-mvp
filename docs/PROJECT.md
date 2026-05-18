@@ -87,7 +87,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | B4 | Market-ордера (FOK/IOC) | `done` |
 | B5 | WebSocket / Realtime обновление стакана | `done` |
 | B6 | Комиссия платформы (% с оборота) | `done` |
-| B7 | Neg-risk / мульти-исходные рынки | `planned` |
+| B7 | Neg-risk / мульти-исходные рынки | `done` (multi-outcome MVP; neg-risk economics — backlog) |
 
 ### Блок C — Рынки и контент
 

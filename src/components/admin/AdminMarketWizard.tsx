@@ -42,6 +42,8 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     draft?.resolutionChecklist ?? "",
   );
   const [isSandbox, setIsSandbox] = useState(false);
+  const [isMultiOutcome, setIsMultiOutcome] = useState(false);
+  const [outcomeLabels, setOutcomeLabels] = useState("");
 
   function onTitleChange(value: string) {
     setTitle(value);
@@ -75,6 +77,22 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     is_sandbox: isSandbox,
     created_at: new Date().toISOString(),
     yes_price: draft?.referenceYesPrice ?? 0.5,
+    outcome_mode: isMultiOutcome ? "multi" : "binary",
+    outcomes: isMultiOutcome
+      ? outcomeLabels
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((label, i) => ({
+            outcome_key: slugifyTitle(label) || `outcome-${i}`,
+            label,
+            sort_order: i,
+          }))
+      : [
+          { outcome_key: "yes", label: "Да", sort_order: 0 },
+          { outcome_key: "no", label: "Нет", sort_order: 1 },
+        ],
+    outcome_prices: { yes: draft?.referenceYesPrice ?? 0.5, no: 0.5 },
   };
 
   function canGoStep2() {
@@ -100,6 +118,22 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     formData.set("resolutionRules", resolutionRules);
     formData.set("resolutionChecklist", resolutionChecklist);
     if (isSandbox) formData.set("isSandbox", "true");
+
+    if (isMultiOutcome) {
+      const lines = outcomeLabels
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      if (lines.length < 3 || lines.length > 8) {
+        setMessage("Мульти-исход: от 3 до 8 строк (по одному названию)");
+        return;
+      }
+      const outcomes = lines.map((label, i) => ({
+        key: slugifyTitle(label) || `outcome-${i}`,
+        label,
+      }));
+      formData.set("outcomesJson", JSON.stringify(outcomes));
+    }
 
     startTransition(async () => {
       const result = await createMarket(formData);
@@ -186,6 +220,26 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
           >
             {showAdvanced ? "Скрыть" : "Показать"} расширенные настройки
           </button>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-400">
+            <input
+              type="checkbox"
+              checked={isMultiOutcome}
+              onChange={(e) => setIsMultiOutcome(e.target.checked)}
+              className="rounded border-zinc-600"
+            />
+            Мульти-исход (3–8 вариантов, sandbox рекомендуется)
+          </label>
+          {isMultiOutcome && (
+            <Field label="Исходы (по одному на строку) *">
+              <textarea
+                rows={5}
+                value={outcomeLabels}
+                onChange={(e) => setOutcomeLabels(e.target.value)}
+                className={inputClass}
+                placeholder={"Кандидат A\nКандидат B\nКандидат C"}
+              />
+            </Field>
+          )}
           {showAdvanced && (
             <Field label="Slug (URL)">
               <input

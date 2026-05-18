@@ -1,6 +1,14 @@
 export type MarketCategory = "sport" | "crypto";
 export type MarketStatus = "open" | "closed" | "resolved";
 export type OutcomeSide = "yes" | "no";
+export type OutcomeKey = string;
+export type OutcomeMode = "binary" | "multi";
+
+export interface MarketOutcome {
+  outcome_key: string;
+  label: string;
+  sort_order: number;
+}
 export type OrderDirection = "buy" | "sell";
 export type OrderKind = "limit" | "market";
 export type TimeInForce = "gtc" | "fok" | "ioc";
@@ -13,6 +21,8 @@ export interface Market {
   category: MarketCategory;
   status: MarketStatus;
   resolved_side: OutcomeSide | null;
+  resolved_outcome_key?: string | null;
+  outcome_mode?: OutcomeMode;
   closes_at: string | null;
   resolution_rules: string | null;
   resolution_checklist: string[];
@@ -42,7 +52,7 @@ export interface Order {
   id: string;
   user_id: string;
   market_id: string;
-  side: OutcomeSide;
+  side: OutcomeKey;
   direction: OrderDirection;
   price: number;
   size: number;
@@ -56,7 +66,7 @@ export interface Order {
 export interface Trade {
   id: string;
   market_id: string;
-  side: OutcomeSide;
+  side: OutcomeKey;
   price: number;
   size: number;
   fee_amount?: number;
@@ -68,10 +78,12 @@ export interface Trade {
 export interface Position {
   user_id: string;
   market_id: string;
-  side: OutcomeSide;
+  side: OutcomeKey;
   shares: number;
 }
 
 export interface MarketWithPrice extends Market {
   yes_price: number;
+  outcomes: MarketOutcome[];
+  outcome_prices: Record<string, number>;
 }

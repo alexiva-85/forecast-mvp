@@ -32,17 +32,19 @@ export default async function MarketPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  let yesShares = 0;
-  let noShares = 0;
+  const outcomeShares: Record<string, number> = {};
+  for (const outcome of market.outcomes) {
+    outcomeShares[outcome.outcome_key] = 0;
+  }
   if (user) {
     const { data: positions } = await supabase
       .from("positions")
       .select("side, shares")
       .eq("market_id", market.id)
       .eq("user_id", user.id);
-    yesShares =
-      Number(positions?.find((p) => p.side === "yes")?.shares) || 0;
-    noShares = Number(positions?.find((p) => p.side === "no")?.shares) || 0;
+    for (const p of positions ?? []) {
+      outcomeShares[p.side as string] = Number(p.shares) || 0;
+    }
   }
 
   const { data: trades } = await supabase
@@ -133,11 +135,29 @@ export default async function MarketPage({
         <div className="lg:col-span-3 space-y-6">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
             <h2 className="mb-3 text-sm font-medium text-zinc-400">
-              Текущая вероятность «Да»
+              {market.outcome_mode === "multi"
+                ? "Исходы"
+                : "Текущая вероятность «Да»"}
             </h2>
-            <p className="text-4xl font-semibold text-emerald-400">
-              {formatPrice(market.yes_price)}
-            </p>
+            {market.outcome_mode === "multi" ? (
+              <ul className="space-y-2">
+                {market.outcomes.map((o) => (
+                  <li
+                    key={o.outcome_key}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-zinc-300">{o.label}</span>
+                    <span className="font-semibold text-emerald-400">
+                      {formatPrice(market.outcome_prices[o.outcome_key] ?? 0.5)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-4xl font-semibold text-emerald-400">
+                {formatPrice(market.yes_price)}
+              </p>
+            )}
           </div>
 
           <MarketLiveData
@@ -151,8 +171,7 @@ export default async function MarketPage({
           <TradePanel
             market={market}
             userId={user?.id ?? null}
-            yesShares={yesShares}
-            noShares={noShares}
+            outcomeShares={outcomeShares}
             tradeFeeRate={platform.tradeFeeRate}
           />
           {user && userOpenOrders.length > 0 && (

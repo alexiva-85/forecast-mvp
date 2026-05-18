@@ -50,9 +50,23 @@ export async function createMarket(formData: FormData) {
       ? new Date(closesAtRaw).toISOString()
       : null;
 
-    const isSandbox = formData.get("isSandbox") === "true";
+  const isSandbox = formData.get("isSandbox") === "true";
 
-    const { data, error } = await supabase.rpc("admin_create_market", {
+  const outcomesRaw = (formData.get("outcomesJson") as string | null)?.trim();
+  let p_outcomes: { key: string; label: string }[] | null = null;
+  if (outcomesRaw) {
+    try {
+      const parsed = JSON.parse(outcomesRaw) as { key: string; label: string }[];
+      if (!Array.isArray(parsed) || parsed.length < 2) {
+        return { error: "Укажите минимум 2 исхода" };
+      }
+      p_outcomes = parsed;
+    } catch {
+      return { error: "Некорректный формат исходов" };
+    }
+  }
+
+  const { data, error } = await supabase.rpc("admin_create_market", {
       p_slug: slug,
       p_title: title,
       p_description: description || null,
@@ -61,8 +75,9 @@ export async function createMarket(formData: FormData) {
       p_resolution_rules: resolutionRules,
       p_resolution_checklist: checklist,
       p_tags: tags,
-      p_is_sandbox: isSandbox,
-    });
+    p_is_sandbox: isSandbox,
+    p_outcomes: p_outcomes,
+  });
 
     if (error) {
       return { error: mapAdminError(error.message) };
@@ -77,14 +92,14 @@ export async function createMarket(formData: FormData) {
 
 export async function adminResolveMarket(
   marketId: string,
-  side: "yes" | "no",
+  outcomeKey: string,
   slug: string,
 ) {
   return withSentryServerAction("adminResolveMarket", async () => {
     const supabase = await createClient();
     const { error } = await supabase.rpc("admin_resolve_market", {
       p_market_id: marketId,
-      p_side: side,
+      p_side: outcomeKey,
     });
 
     if (error) {
@@ -148,6 +163,15 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Market not found")) {
     return "Рынок не найден";
+  }
+  if (message.includes("Invalid outcome")) {
+    return "Некорректный исход";
+  }
+  if (message.includes("Outcomes count must be")) {
+    return "От 2 до 8 исходов";
+  }
+  if (message.includes("Invalid outcome key")) {
+    return "Ключ исхода: латиница, цифры и дефисы";
   }
   reportUnexpectedRpcError("admin", message);
   return message;

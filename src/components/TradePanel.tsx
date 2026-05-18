@@ -7,6 +7,7 @@ import {
   redeemPositions,
 } from "@/app/actions/trading";
 import type { MarketOrderResult } from "@/app/actions/trading";
+import { formatOutcomeLabel } from "@/lib/outcomes";
 import type { MarketWithPrice } from "@/lib/types";
 import { formatPrice } from "@/lib/markets";
 import {
@@ -23,38 +24,39 @@ type MarketTif = "fok" | "ioc";
 export function TradePanel({
   market,
   userId,
-  yesShares,
-  noShares,
+  outcomeShares,
   tradeFeeRate,
 }: {
   market: MarketWithPrice;
   userId: string | null;
-  yesShares: number;
-  noShares: number;
+  outcomeShares: Record<string, number>;
   tradeFeeRate: number;
 }) {
-  const [side, setSide] = useState<"yes" | "no">("yes");
+  const defaultOutcome = market.outcomes[0]?.outcome_key ?? "yes";
+  const [side, setSide] = useState(defaultOutcome);
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [orderMode, setOrderMode] = useState<OrderMode>("limit");
   const [marketTif, setMarketTif] = useState<MarketTif>("ioc");
-  const [price, setPrice] = useState(
-    side === "yes" ? market.yes_price : 1 - market.yes_price,
-  );
+  const outcomePrice = (key: string) =>
+    market.outcome_prices[key] ??
+    (key === "yes" ? market.yes_price : key === "no" ? 1 - market.yes_price : 0.5);
+
+  const [price, setPrice] = useState(outcomePrice(defaultOutcome));
   const [size, setSize] = useState(10);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const isOpen = market.status === "open";
   const isResolved = market.status === "resolved";
-  const refPrice = side === "yes" ? market.yes_price : 1 - market.yes_price;
+  const refPrice = outcomePrice(side);
   const estPrice = orderMode === "market" ? refPrice : price;
   const notional = estPrice * size;
   const totalFee = estimateTradeFee(notional, tradeFeeRate);
   const sideFee = estimateSideFee(notional, tradeFeeRate);
 
-  function onSideChange(next: "yes" | "no") {
+  function onSideChange(next: string) {
     setSide(next);
-    setPrice(next === "yes" ? market.yes_price : 1 - market.yes_price);
+    setPrice(outcomePrice(next));
   }
 
   function formatMarketResult(result: MarketOrderResult): string {
@@ -155,7 +157,14 @@ export function TradePanel({
         <p className="text-sm text-zinc-400">
           Исход:{" "}
           <span className="font-medium text-white">
-            {market.resolved_side === "yes" ? "Да" : "Нет"}
+            {formatOutcomeLabel(
+              market.resolved_outcome_key ?? market.resolved_side ?? "",
+              market.outcomes.find(
+                (o) =>
+                  o.outcome_key ===
+                  (market.resolved_outcome_key ?? market.resolved_side),
+              )?.label,
+            )}
           </span>
         </p>
         {userId && (
@@ -202,29 +211,22 @@ export function TradePanel({
         ))}
       </div>
 
-      <div className="mb-4 flex gap-2">
-        <button
-          type="button"
-          onClick={() => onSideChange("yes")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
-            side === "yes"
-              ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40"
-              : "bg-zinc-800 text-zinc-400"
-          }`}
-        >
-          Да {formatPrice(market.yes_price)}
-        </button>
-        <button
-          type="button"
-          onClick={() => onSideChange("no")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
-            side === "no"
-              ? "bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/40"
-              : "bg-zinc-800 text-zinc-400"
-          }`}
-        >
-          Нет {formatPrice(1 - market.yes_price)}
-        </button>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {market.outcomes.map((outcome) => (
+          <button
+            key={outcome.outcome_key}
+            type="button"
+            onClick={() => onSideChange(outcome.outcome_key)}
+            className={`min-w-[7rem] flex-1 rounded-lg py-2.5 text-sm font-medium ${
+              side === outcome.outcome_key
+                ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40"
+                : "bg-zinc-800 text-zinc-400"
+            }`}
+          >
+            {outcome.label}{" "}
+            {formatPrice(outcomePrice(outcome.outcome_key))}
+          </button>
+        ))}
       </div>
 
       <div className="mb-4">
@@ -325,7 +327,13 @@ export function TradePanel({
               </span>
             </div>
             <p className="mt-2 border-t border-zinc-800/80 pt-2 text-xs text-zinc-600">
-              В портфеле: Да {yesShares} · Нет {noShares}
+              В портфеле:{" "}
+              {market.outcomes
+                .map(
+                  (o) =>
+                    `${o.label} ${outcomeShares[o.outcome_key] ?? 0}`,
+                )
+                .join(" · ")}
             </p>
           </div>
 

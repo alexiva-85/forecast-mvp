@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
+import { getMarketOutcomes, formatOutcomeLabel } from "@/lib/outcomes";
 import { parseChecklist, type MarketStatus } from "@/lib/types";
 import { AdminResolvePanel } from "@/components/admin/AdminResolvePanel";
 import { adminStatusLabel } from "@/lib/admin";
@@ -24,6 +25,7 @@ export default async function AdminResolveMarketPage({
   if (!market) notFound();
 
   const checklist = parseChecklist(market.resolution_checklist);
+  const outcomes = await getMarketOutcomes(supabase, market.id);
 
   if (market.status === "resolved") {
     return (
@@ -34,7 +36,14 @@ export default async function AdminResolveMarketPage({
         <p className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 text-sm text-zinc-400">
           Рынок уже завершён. Исход:{" "}
           <strong className="text-white">
-            {market.resolved_side === "yes" ? "Да" : "Нет"}
+            {formatOutcomeLabel(
+              market.resolved_outcome_key ?? market.resolved_side ?? "",
+              outcomes.find(
+                (o) =>
+                  o.outcome_key ===
+                  (market.resolved_outcome_key ?? market.resolved_side),
+              )?.label,
+            )}
           </strong>
         </p>
       </section>
@@ -74,6 +83,7 @@ export default async function AdminResolveMarketPage({
         title={market.title}
         resolutionRules={market.resolution_rules}
         resolutionChecklist={checklist}
+        outcomes={outcomes}
       />
     </section>
   );

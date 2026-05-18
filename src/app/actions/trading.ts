@@ -186,6 +186,9 @@ function mapDbError(message: string): string {
   if (message.includes("Invalid time in force")) {
     return "Неверный тип исполнения (FOK или IOC)";
   }
+  if (message.includes("Invalid outcome")) {
+    return "Некорректный исход";
+  }
   reportUnexpectedRpcError("trading", message);
   return message;
 }
