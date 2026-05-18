@@ -84,7 +84,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | B1 | Лимитный матчинг в PostgreSQL | `done` |
 | B2 | Отображение стакана и последних сделок | `done` |
 | B3 | Отмена ордеров | `done` |
-| B4 | Market-ордера (FOK/IOC) | `planned` |
+| B4 | Market-ордера (FOK/IOC) | `done` |
 | B5 | WebSocket / Realtime обновление стакана | `done` |
 | B6 | Комиссия платформы (% с оборота) | `done` |
 | B7 | Neg-risk / мульти-исходные рынки | `planned` |
@@ -111,7 +111,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | D2 | Профиль, display name | `done` |
 | D3 | Magic link / OAuth | `planned` |
 | D4 | KYC-заготовка, лимиты | `planned` |
-| D5 | История операций / экспорт | `planned` |
+| D5 | История операций в портфеле | `done` |
 | D6 | Модерация, жалобы | `planned` |
 
 ### Блок E — Финансовый контур (реальные деньги)

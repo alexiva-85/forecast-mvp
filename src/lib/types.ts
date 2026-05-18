@@ -2,6 +2,8 @@ export type MarketCategory = "sport" | "crypto";
 export type MarketStatus = "open" | "closed" | "resolved";
 export type OutcomeSide = "yes" | "no";
 export type OrderDirection = "buy" | "sell";
+export type OrderKind = "limit" | "market";
+export type TimeInForce = "gtc" | "fok" | "ioc";
 
 export interface Market {
   id: string;
@@ -46,6 +48,8 @@ export interface Order {
   size: number;
   remaining: number;
   status: string;
+  order_kind?: OrderKind;
+  time_in_force?: TimeInForce;
   created_at: string;
 }
 

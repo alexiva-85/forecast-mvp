@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ActivityHistory } from "@/components/ActivityHistory";
 import { OpenOrdersList } from "@/components/OpenOrdersList";
+import { parseActivityRows } from "@/lib/activity";
 
 export default async function PortfolioPage() {
   const supabase = await createClient();
@@ -30,6 +32,11 @@ export default async function PortfolioPage() {
     .eq("status", "open")
     .order("created_at", { ascending: false });
 
+  const { data: activityRaw } = await supabase.rpc("list_my_activity", {
+    p_limit: 100,
+  });
+  const activities = parseActivityRows(activityRaw);
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-2xl font-semibold text-white">Портфель</h1>
@@ -47,6 +54,11 @@ export default async function PortfolioPage() {
           />
         </div>
       )}
+
+      <h2 className="mt-10 mb-4 text-sm font-medium text-zinc-400">
+        История операций
+      </h2>
+      <ActivityHistory activities={activities} />
 
       <h2 className="mt-10 mb-4 text-sm font-medium text-zinc-400">Позиции</h2>
       {!positions?.length ? (

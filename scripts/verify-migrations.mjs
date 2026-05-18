@@ -165,6 +165,54 @@ const checks = [
     },
   },
   {
+    name: "B4 — place_market_order",
+    async run() {
+      const res = await rpc("place_market_order", {
+        p_market_id: "00000000-0000-0000-0000-000000000001",
+        p_side: "yes",
+        p_direction: "buy",
+        p_size: 1,
+        p_time_in_force: "ioc",
+      });
+      return res.code === "P0001" && res.message?.includes("Not authenticated");
+    },
+  },
+  {
+    name: "B4 — orders.order_kind",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/orders?select=order_kind,time_in_force&limit=1`,
+        { headers: headers() },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message ?? res.statusText);
+      }
+      return true;
+    },
+  },
+  {
+    name: "D5 — list_my_activity",
+    async run() {
+      const res = await rpc("list_my_activity", { p_limit: 10 });
+      return res.code === "P0001" && res.message?.includes("Not authenticated");
+    },
+  },
+  {
+    name: "D5 — account_events",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/account_events?select=id&limit=1`,
+        { headers: headers() },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message ?? res.statusText);
+      }
+      return true;
+    },
+  },
+  {
     name: "C7 — admin_resolve closed only",
     async run() {
       const res = await rpc("admin_resolve_market", {

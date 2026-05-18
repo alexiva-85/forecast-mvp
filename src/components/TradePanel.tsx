@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { placeOrder, redeemPositions } from "@/app/actions/trading";
+import {
+  placeMarketOrder,
+  placeOrder,
+  redeemPositions,
+} from "@/app/actions/trading";
+import type { MarketOrderResult } from "@/app/actions/trading";
 import type { MarketWithPrice } from "@/lib/types";
 import { formatPrice } from "@/lib/markets";
 import {
@@ -9,6 +14,11 @@ import {
   estimateTradeFee,
   formatFeePercent,
 } from "@/lib/platform";
+import { HelpHint } from "@/components/HelpHint";
+import { EXECUTION_INLINE, TRADE_HINTS } from "@/components/trade-hints";
+
+type OrderMode = "limit" | "market";
+type MarketTif = "fok" | "ioc";
 
 export function TradePanel({
   market,
@@ -25,6 +35,8 @@ export function TradePanel({
 }) {
   const [side, setSide] = useState<"yes" | "no">("yes");
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
+  const [orderMode, setOrderMode] = useState<OrderMode>("limit");
+  const [marketTif, setMarketTif] = useState<MarketTif>("ioc");
   const [price, setPrice] = useState(
     side === "yes" ? market.yes_price : 1 - market.yes_price,
   );
@@ -34,13 +46,30 @@ export function TradePanel({
 
   const isOpen = market.status === "open";
   const isResolved = market.status === "resolved";
-  const notional = price * size;
+  const refPrice = side === "yes" ? market.yes_price : 1 - market.yes_price;
+  const estPrice = orderMode === "market" ? refPrice : price;
+  const notional = estPrice * size;
   const totalFee = estimateTradeFee(notional, tradeFeeRate);
   const sideFee = estimateSideFee(notional, tradeFeeRate);
 
   function onSideChange(next: "yes" | "no") {
     setSide(next);
     setPrice(next === "yes" ? market.yes_price : 1 - market.yes_price);
+  }
+
+  function formatMarketResult(result: MarketOrderResult): string {
+    const { filled, requested, avgPrice, timeInForce } = result;
+    if (filled <= 0) {
+      return timeInForce === "fok"
+        ? "FOK: нет исполнения — ордер отменён"
+        : "IOC: нет исполнения в стакане";
+    }
+    const avg =
+      avgPrice != null ? ` по ~${formatPrice(avgPrice)}` : "";
+    if (filled >= requested) {
+      return `Исполнено ${filled} долей${avg}`;
+    }
+    return `Исполнено ${filled} из ${requested}${avg}`;
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -55,13 +84,21 @@ export function TradePanel({
     formData.set("slug", market.slug);
     formData.set("side", side);
     formData.set("direction", direction);
-    formData.set("price", String(price));
     formData.set("size", String(size));
 
     startTransition(async () => {
+      if (orderMode === "market") {
+        formData.set("timeInForce", marketTif);
+        const result = await placeMarketOrder(formData);
+        if (result.error) setMessage(result.error);
+        else if (result.result) setMessage(formatMarketResult(result.result));
+        return;
+      }
+
+      formData.set("price", String(price));
       const result = await placeOrder(formData);
       if (result.error) setMessage(result.error);
-      else setMessage("Ордер размещён");
+      else setMessage("Лимитный ордер размещён");
     });
   }
 
@@ -72,6 +109,45 @@ export function TradePanel({
       else setMessage(`Выплачено $${result.payout}`);
     });
   }
+
+  const submitLabel =
+    orderMode === "market"
+      ? direction === "buy"
+        ? "Купить по рынку"
+        : "Продать по рынку"
+      : direction === "buy"
+        ? "Купить"
+        : "Продать";
+
+  const marketExecutionBlock = (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs text-zinc-500">Исполнение</span>
+        <HelpHint label="IOC и FOK" align="start">
+          {TRADE_HINTS.execution}
+        </HelpHint>
+      </div>
+      <div className="flex gap-2">
+        {(["ioc", "fok"] as const).map((tif) => (
+          <button
+            key={tif}
+            type="button"
+            onClick={() => setMarketTif(tif)}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium uppercase tracking-wide ${
+              marketTif === tif
+                ? "bg-zinc-700 text-white"
+                : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            {tif}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs leading-snug text-zinc-500">
+        {EXECUTION_INLINE[marketTif]}
+      </p>
+    </div>
+  );
 
   if (isResolved) {
     return (
@@ -115,7 +191,7 @@ export function TradePanel({
             key={d}
             type="button"
             onClick={() => setDirection(d)}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+            className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition ${
               direction === d
                 ? "bg-white text-zinc-900"
                 : "bg-zinc-800 text-zinc-400 hover:text-white"
@@ -130,7 +206,7 @@ export function TradePanel({
         <button
           type="button"
           onClick={() => onSideChange("yes")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
             side === "yes"
               ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40"
               : "bg-zinc-800 text-zinc-400"
@@ -141,7 +217,7 @@ export function TradePanel({
         <button
           type="button"
           onClick={() => onSideChange("no")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-medium ${
             side === "no"
               ? "bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/40"
               : "bg-zinc-800 text-zinc-400"
@@ -151,6 +227,45 @@ export function TradePanel({
         </button>
       </div>
 
+      <div className="mb-4">
+        <div className="mb-2 flex items-center gap-1.5">
+          <span className="text-xs text-zinc-500">Тип ордера</span>
+          <HelpHint label="Лимит и рынок" align="start">
+            {TRADE_HINTS.orderType}
+          </HelpHint>
+        </div>
+        <div className="flex gap-2">
+          {(
+            [
+              ["limit", "Лимит"],
+              ["market", "Рынок"],
+            ] as const
+          ).map(([mode, label]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setOrderMode(mode)}
+              className={`flex-1 rounded-lg py-2 text-sm font-medium ${
+                orderMode === mode
+                  ? "bg-zinc-700 text-white"
+                  : "bg-zinc-800 text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {orderMode === "market" && (
+          <p className="mt-2 text-xs text-zinc-500">
+            По лучшим заявкам в стакане · покупка до 99¢, продажа от 1¢
+          </p>
+        )}
+      </div>
+
+      {orderMode === "market" && (
+        <div className="mb-4">{marketExecutionBlock}</div>
+      )}
+
       {!userId ? (
         <p className="text-center text-sm text-zinc-500">
           <a href="/login" className="text-emerald-400 hover:underline">
@@ -159,21 +274,24 @@ export function TradePanel({
           , чтобы торговать
         </p>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-xs text-zinc-500">
-              Лимитная цена (0.01–0.99)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              max="0.99"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-white"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {orderMode === "limit" && (
+            <div>
+              <label className="mb-1 block text-xs text-zinc-500">
+                Цена (0.01–0.99)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max="0.99"
+                value={price}
+                onChange={(e) => setPrice(Number(e.target.value))}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-white"
+              />
+            </div>
+          )}
+
           <div>
             <label className="mb-1 block text-xs text-zinc-500">
               Количество долей
@@ -184,32 +302,52 @@ export function TradePanel({
               step="1"
               value={size}
               onChange={(e) => setSize(Number(e.target.value))}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-white"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-white"
             />
           </div>
-          <p className="text-xs text-zinc-500">
-            В портфеле: Да {yesShares} · Нет {noShares}
-          </p>
-          <p className="text-xs text-zinc-500">
-            {direction === "buy" ? "Макс. списание" : "Ожидаемый доход"}: $
-            {(price * size).toFixed(2)}
-          </p>
-          <p className="text-xs text-zinc-600">
-            Комиссия {formatFeePercent(tradeFeeRate)} с оборота при исполнении
-            (ваша доля ≈ ${sideFee.toFixed(2)}, всего ${totalFee.toFixed(2)})
-          </p>
+
+          <div className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-sm text-zinc-400">
+                {direction === "buy" ? "Списание" : "Доход"}
+                <HelpHint label="Оценка и комиссия" align="end">
+                  {TRADE_HINTS.estimate}
+                </HelpHint>
+              </span>
+              <span className="text-base font-semibold text-white">
+                ${notional.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-zinc-500">
+              <span>
+                Комиссия {formatFeePercent(tradeFeeRate)} · ваша ≈ $
+                {sideFee.toFixed(2)}
+              </span>
+            </div>
+            <p className="mt-2 border-t border-zinc-800/80 pt-2 text-xs text-zinc-600">
+              В портфеле: Да {yesShares} · Нет {noShares}
+            </p>
+          </div>
+
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-emerald-500 py-2.5 font-medium text-zinc-950 hover:bg-emerald-400 disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-500 py-3 text-base font-semibold text-zinc-950 shadow-sm shadow-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50"
           >
-            {pending ? "..." : direction === "buy" ? "Купить" : "Продать"}
+            {pending ? "..." : submitLabel}
           </button>
         </form>
       )}
+
       {message && (
         <p
-          className={`mt-2 text-sm ${message.includes("размещён") || message.includes("Выплачено") ? "text-emerald-400" : "text-rose-400"}`}
+          className={`mt-3 text-sm ${
+            message.includes("размещён") ||
+            message.includes("Исполнено") ||
+            message.includes("Выплачено")
+              ? "text-emerald-400"
+              : "text-rose-400"
+          }`}
         >
           {message}
         </p>
