@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { adminResolveMarket } from "@/app/actions/admin";
+import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import type { MarketOutcome } from "@/lib/types";
 
 export function AdminResolvePanel({
@@ -63,7 +64,7 @@ export function AdminResolvePanel({
     <section className="space-y-6 rounded-xl border border-amber-500/20 bg-zinc-900/50 p-6">
       <header>
         <h2 className="text-lg font-medium text-white">{title}</h2>
-        <p className="mt-1 text-sm text-zinc-500">/{slug}</p>
+        <AdminMarketSlug slug={slug} className="mt-2" />
       </header>
 
       {resolutionRules && (

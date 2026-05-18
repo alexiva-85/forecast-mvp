@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AdminActionItem } from "@/lib/admin";
 import { actionKindMeta, adminStatusLabel } from "@/lib/admin";
+import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import { categoryLabel } from "@/lib/markets";
 
 export function AdminActionQueue({
@@ -43,6 +44,7 @@ export function AdminActionQueue({
                   </p>
                 </section>
                 <p className={`mt-1 text-xs ${meta.labelClass}`}>{item.label}</p>
+                <AdminMarketSlug slug={item.market.slug} className="mt-1" />
                 <p className="mt-1 text-xs text-zinc-600">
                   {categoryLabel(item.market.category)} ·{" "}
                   {adminStatusLabel(item.market.status)}

@@ -7,6 +7,7 @@ import {
   sandboxBadgeClass,
 } from "@/lib/admin";
 import { categoryLabel, formatClosesAt } from "@/lib/markets";
+import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 
 export function AdminMarketRow({ market }: { market: AdminMarket }) {
   const resolveHref = `/admin/resolve/${market.slug}`;
@@ -42,6 +43,7 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
               )}
           </section>
           <h3 className="font-medium text-white">{market.title}</h3>
+          <AdminMarketSlug slug={market.slug} className="mt-1" />
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-500">
             {formatClosesAt(market.closes_at) && (
               <span>Закрытие: {formatClosesAt(market.closes_at)}</span>

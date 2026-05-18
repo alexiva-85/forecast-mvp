@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { fetchAdminMarkets } from "@/lib/admin";
+import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import { categoryLabel, formatClosesAt } from "@/lib/markets";
 
 export default async function AdminResolveQueuePage() {
@@ -34,6 +35,7 @@ export default async function AdminResolveQueuePage() {
             >
               <section>
                 <p className="font-medium text-white">{m.title}</p>
+                <AdminMarketSlug slug={m.slug} className="mt-1" />
                 <p className="mt-1 text-xs text-zinc-500">
                   {categoryLabel(m.category)}
                   {formatClosesAt(m.closes_at) &&
