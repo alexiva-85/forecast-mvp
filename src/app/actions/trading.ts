@@ -2,6 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  reportUnexpectedRpcError,
+  withSentryServerAction,
+} from "@/lib/sentry-server-action";
 
 export type MarketOrderResult = {
   filled: number;
@@ -11,130 +15,138 @@ export type MarketOrderResult = {
 };
 
 export async function placeMarketOrder(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  return withSentryServerAction("placeMarketOrder", async () => {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Войдите в аккаунт" };
-  }
+    if (!user) {
+      return { error: "Войдите в аккаунт" };
+    }
 
-  const marketId = formData.get("marketId") as string;
-  const side = formData.get("side") as string;
-  const direction = formData.get("direction") as string;
-  const size = Number(formData.get("size"));
-  const timeInForce = formData.get("timeInForce") as string;
+    const marketId = formData.get("marketId") as string;
+    const side = formData.get("side") as string;
+    const direction = formData.get("direction") as string;
+    const size = Number(formData.get("size"));
+    const timeInForce = formData.get("timeInForce") as string;
 
-  const { data, error } = await supabase.rpc("place_market_order", {
-    p_market_id: marketId,
-    p_side: side,
-    p_direction: direction,
-    p_size: size,
-    p_time_in_force: timeInForce,
+    const { data, error } = await supabase.rpc("place_market_order", {
+      p_market_id: marketId,
+      p_side: side,
+      p_direction: direction,
+      p_size: size,
+      p_time_in_force: timeInForce,
+    });
+
+    if (error) {
+      return { error: mapDbError(error.message) };
+    }
+
+    const slug = formData.get("slug") as string;
+    revalidatePath("/");
+    revalidatePath(`/market/${slug}`);
+    revalidatePath("/portfolio");
+
+    const row = data as {
+      filled: number;
+      requested: number;
+      avg_price: number | null;
+      time_in_force: string;
+    };
+
+    return {
+      success: true,
+      result: {
+        filled: Number(row.filled),
+        requested: Number(row.requested),
+        avgPrice: row.avg_price != null ? Number(row.avg_price) : null,
+        timeInForce: row.time_in_force,
+      } satisfies MarketOrderResult,
+    };
   });
-
-  if (error) {
-    return { error: mapDbError(error.message) };
-  }
-
-  const slug = formData.get("slug") as string;
-  revalidatePath("/");
-  revalidatePath(`/market/${slug}`);
-  revalidatePath("/portfolio");
-
-  const row = data as {
-    filled: number;
-    requested: number;
-    avg_price: number | null;
-    time_in_force: string;
-  };
-
-  return {
-    success: true,
-    result: {
-      filled: Number(row.filled),
-      requested: Number(row.requested),
-      avgPrice: row.avg_price != null ? Number(row.avg_price) : null,
-      timeInForce: row.time_in_force,
-    } satisfies MarketOrderResult,
-  };
 }
 
 export async function placeOrder(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  return withSentryServerAction("placeOrder", async () => {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Войдите в аккаунт" };
-  }
+    if (!user) {
+      return { error: "Войдите в аккаунт" };
+    }
 
-  const marketId = formData.get("marketId") as string;
-  const side = formData.get("side") as string;
-  const direction = formData.get("direction") as string;
-  const price = Number(formData.get("price"));
-  const size = Number(formData.get("size"));
+    const marketId = formData.get("marketId") as string;
+    const side = formData.get("side") as string;
+    const direction = formData.get("direction") as string;
+    const price = Number(formData.get("price"));
+    const size = Number(formData.get("size"));
 
-  const { error } = await supabase.rpc("place_order", {
-    p_market_id: marketId,
-    p_side: side,
-    p_direction: direction,
-    p_price: price,
-    p_size: size,
+    const { error } = await supabase.rpc("place_order", {
+      p_market_id: marketId,
+      p_side: side,
+      p_direction: direction,
+      p_price: price,
+      p_size: size,
+    });
+
+    if (error) {
+      return { error: mapDbError(error.message) };
+    }
+
+    const slug = formData.get("slug") as string;
+    revalidatePath("/");
+    revalidatePath(`/market/${slug}`);
+    return { success: true };
   });
-
-  if (error) {
-    return { error: mapDbError(error.message) };
-  }
-
-  const slug = formData.get("slug") as string;
-  revalidatePath("/");
-  revalidatePath(`/market/${slug}`);
-  return { success: true };
 }
 
 export async function cancelOrder(orderId: string, slug?: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  return withSentryServerAction("cancelOrder", async () => {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Войдите в аккаунт" };
-  }
+    if (!user) {
+      return { error: "Войдите в аккаунт" };
+    }
 
-  const { error } = await supabase.rpc("cancel_order", {
-    p_order_id: orderId,
+    const { error } = await supabase.rpc("cancel_order", {
+      p_order_id: orderId,
+    });
+
+    if (error) {
+      return { error: mapDbError(error.message) };
+    }
+
+    revalidatePath("/portfolio");
+    if (slug) {
+      revalidatePath(`/market/${slug}`);
+    }
+    revalidatePath("/");
+    return { success: true };
   });
-
-  if (error) {
-    return { error: mapDbError(error.message) };
-  }
-
-  revalidatePath("/portfolio");
-  if (slug) {
-    revalidatePath(`/market/${slug}`);
-  }
-  revalidatePath("/");
-  return { success: true };
 }
 
 export async function redeemPositions(marketId: string, slug: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("redeem_positions", {
-    p_market_id: marketId,
+  return withSentryServerAction("redeemPositions", async () => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("redeem_positions", {
+      p_market_id: marketId,
+    });
+
+    if (error) {
+      return { error: mapDbError(error.message) };
+    }
+
+    revalidatePath("/");
+    revalidatePath(`/market/${slug}`);
+    revalidatePath("/portfolio");
+    return { success: true, payout: data as number };
   });
-
-  if (error) {
-    return { error: mapDbError(error.message) };
-  }
-
-  revalidatePath("/");
-  revalidatePath(`/market/${slug}`);
-  revalidatePath("/portfolio");
-  return { success: true, payout: data as number };
 }
 
 function mapDbError(message: string): string {
@@ -174,5 +186,6 @@ function mapDbError(message: string): string {
   if (message.includes("Invalid time in force")) {
     return "Неверный тип исполнения (FOK или IOC)";
   }
+  reportUnexpectedRpcError("trading", message);
   return message;
 }

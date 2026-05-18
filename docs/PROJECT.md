@@ -142,7 +142,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | G1 | Тесты RPC `place_order` / `redeem` | `done` |
 | G2 | Rate limits, anti-abuse | `done` |
 | G3 | Аудит RLS и SECURITY DEFINER | `done` |
-| G4 | Мониторинг (Sentry, логи Vercel) | `planned` |
+| G4 | Мониторинг (Sentry, логи Vercel) | `done` |
 | G5 | Аудит смарт-контрактов (перед mainnet) | `planned` |
 
 ### Рекомендуемый порядок следующих спринтов
@@ -197,6 +197,8 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | Локальный путь | `~/projects/forecast-mvp` |
 
 **Env:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только в Vercel / `.env.local`, не в git.
+
+**Мониторинг (G4):** `NEXT_PUBLIC_SENTRY_DSN` в Vercel Production/Preview; для читаемых stack trace — `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` (секрет, только Vercel). Логи runtime: Vercel → Project → Logs.
 
 ---
 

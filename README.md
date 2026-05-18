@@ -207,6 +207,18 @@ where id = 'ВАШ_UUID_ИЗ_auth.users';
 - **Vercel:** импорт из GitHub, env `NEXT_PUBLIC_SUPABASE_*`  
 - Скрипт: `bash scripts/deploy-all.sh` (после `gh auth login`)
 
+### Мониторинг (Sentry + Vercel)
+
+1. Создайте проект в [Sentry](https://sentry.io) (платформа Next.js).
+2. В **Vercel → Settings → Environment Variables** (Production и Preview):
+   - `NEXT_PUBLIC_SENTRY_DSN` — DSN из Sentry
+   - `SENTRY_ORG`, `SENTRY_PROJECT` — slug организации и проекта
+   - `SENTRY_AUTH_TOKEN` — [Auth Token](https://sentry.io/settings/account/api/auth-tokens/) с scope `project:releases` (для source maps при `next build`)
+3. После деплоя: **Sentry → Issues** — необработанные ошибки; **Performance** — трейсы (sample rate 10% в production).
+4. **Vercel → Logs** — runtime-логи (`console`, Server Actions); retention по плану Vercel.
+
+Без `NEXT_PUBLIC_SENTRY_DSN` приложение работает как раньше — SDK отключён.
+
 ---
 
 ## Монетизация (концепция)
