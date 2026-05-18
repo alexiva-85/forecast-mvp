@@ -42,9 +42,9 @@ describe("B7 — multi-outcome markets", () => {
       p_tags: [],
       p_is_sandbox: true,
       p_outcomes: [
-        { key: "alpha", label: "Alpha" },
-        { key: "beta", label: "Beta" },
-        { key: "gamma", label: "Gamma" },
+        { key: "o1", label: "Alpha" },
+        { key: "o2", label: "Beta" },
+        { key: "o3", label: "Gamma" },
       ],
     });
 
@@ -58,7 +58,7 @@ describe("B7 — multi-outcome markets", () => {
 
     const { error: buyErr } = await traderClient.rpc("place_order", {
       p_market_id: marketId,
-      p_side: "beta",
+      p_side: "o2",
       p_direction: "buy",
       p_price: 0.4,
       p_size: 2,
@@ -74,7 +74,7 @@ describe("B7 — multi-outcome markets", () => {
       .order("sort_order");
 
     expect(error).toBeNull();
-    expect(data?.map((r) => r.outcome_key)).toEqual(["alpha", "beta", "gamma"]);
+    expect(data?.map((r) => r.outcome_key)).toEqual(["o1", "o2", "o3"]);
   });
 
   it("rejects unknown outcome key", async () => {

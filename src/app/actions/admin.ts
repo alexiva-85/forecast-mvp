@@ -52,13 +52,18 @@ export async function createMarket(formData: FormData) {
 
   const isSandbox = formData.get("isSandbox") === "true";
 
+  const isMultiOutcome = formData.get("isMultiOutcome") === "true";
   const outcomesRaw = (formData.get("outcomesJson") as string | null)?.trim();
   let p_outcomes: { key: string; label: string }[] | null = null;
-  if (outcomesRaw) {
+
+  if (isMultiOutcome) {
+    if (!outcomesRaw) {
+      return { error: "Укажите исходы (по одному на строку)" };
+    }
     try {
       const parsed = JSON.parse(outcomesRaw) as { key: string; label: string }[];
-      if (!Array.isArray(parsed) || parsed.length < 2) {
-        return { error: "Укажите минимум 2 исхода" };
+      if (!Array.isArray(parsed) || parsed.length < 3 || parsed.length > 8) {
+        return { error: "Мульти-исход: от 3 до 8 вариантов" };
       }
       p_outcomes = parsed;
     } catch {
@@ -67,14 +72,14 @@ export async function createMarket(formData: FormData) {
   }
 
   const { data, error } = await supabase.rpc("admin_create_market", {
-      p_slug: slug,
-      p_title: title,
-      p_description: description || null,
-      p_category: category,
-      p_closes_at: closesAt,
-      p_resolution_rules: resolutionRules,
-      p_resolution_checklist: checklist,
-      p_tags: tags,
+    p_slug: slug,
+    p_title: title,
+    p_description: description || null,
+    p_category: category,
+    p_closes_at: closesAt,
+    p_resolution_rules: resolutionRules,
+    p_resolution_checklist: checklist,
+    p_tags: tags,
     p_is_sandbox: isSandbox,
     p_outcomes: p_outcomes,
   });

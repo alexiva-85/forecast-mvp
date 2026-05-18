@@ -85,7 +85,11 @@ async function enrichMarketWithPrices(
   const outcomes = await getMarketOutcomes(supabase, market.id);
   const outcome_prices = await getOutcomePrices(supabase, market.id, outcomes);
   const yes_price = outcome_prices.yes ?? (await getYesPrice(supabase, market.id));
-  return { ...market, outcomes, outcome_prices, yes_price };
+  const outcome_mode =
+    market.outcome_mode === "multi" || outcomes.length > 2
+      ? "multi"
+      : "binary";
+  return { ...market, outcomes, outcome_prices, yes_price, outcome_mode };
 }
 
 export async function getMarketBySlug(

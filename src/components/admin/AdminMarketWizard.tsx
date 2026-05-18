@@ -129,9 +129,10 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
         return;
       }
       const outcomes = lines.map((label, i) => ({
-        key: slugifyTitle(label) || `outcome-${i}`,
+        key: `o${i + 1}`,
         label,
       }));
+      formData.set("isMultiOutcome", "true");
       formData.set("outcomesJson", JSON.stringify(outcomes));
     }
 
@@ -336,6 +337,16 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
 
       {step === 3 && (
         <section className="space-y-4">
+          {isMultiOutcome && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-100/90">
+              <p className="font-medium">Мульти-исход ({previewMarket.outcomes.length})</p>
+              <ul className="mt-2 list-inside list-disc text-amber-200/80">
+                {previewMarket.outcomes.map((o) => (
+                  <li key={o.outcome_key}>{o.label}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p className="text-sm text-zinc-400">Так рынок будет выглядеть в каталоге:</p>
           <MarketCard market={previewMarket} />
           <footer className="flex flex-wrap justify-between gap-2">
