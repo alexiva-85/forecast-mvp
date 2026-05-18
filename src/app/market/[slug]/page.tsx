@@ -14,6 +14,7 @@ import { ResolutionRules } from "@/components/ResolutionRules";
 import { parseChecklist, parseTags } from "@/lib/types";
 import Link from "next/link";
 import { getPlatformSettings } from "@/lib/platform";
+import { buildOutcomeLabelMap } from "@/lib/outcomes";
 
 export default async function MarketPage({
   params,
@@ -82,6 +83,9 @@ export default async function MarketPage({
       size: Number(t.size),
       fee_amount: Number(t.fee_amount ?? 0),
     })) ?? [];
+
+  const outcomeLabels = buildOutcomeLabelMap(market.outcomes);
+  const isMulti = market.outcome_mode === "multi";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -164,6 +168,8 @@ export default async function MarketPage({
             marketId={market.id}
             initialOrders={initialOrders}
             initialTrades={initialTrades}
+            outcomeLabels={outcomeLabels}
+            isMulti={isMulti}
           />
         </div>
 
@@ -180,6 +186,7 @@ export default async function MarketPage({
               marketId={market.id}
               slug={market.slug}
               initialOrders={userOpenOrders}
+              outcomeLabels={outcomeLabels}
             />
           )}
         </div>

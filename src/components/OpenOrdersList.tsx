@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { cancelOrder } from "@/app/actions/trading";
 import { formatPrice } from "@/lib/markets";
-import type { Order, OutcomeSide } from "@/lib/types";
+import { formatOutcomeLabel } from "@/lib/outcomes";
+import type { Order } from "@/lib/types";
 
 export type OpenOrderRow = Order & {
   markets?: { slug: string; title: string } | null;
@@ -17,12 +18,14 @@ export function OpenOrdersList({
   slug,
   initialOrders,
   showMarket = false,
+  outcomeLabels,
 }: {
   userId: string;
   marketId?: string;
   slug?: string;
   initialOrders: OpenOrderRow[];
   showMarket?: boolean;
+  outcomeLabels?: Record<string, string>;
 }) {
   const [orders, setOrders] = useState(initialOrders);
   const [pending, startTransition] = useTransition();
@@ -102,7 +105,8 @@ export function OpenOrdersList({
                 </Link>
               )}
               <span className="text-zinc-300">
-                {sideLabel(o.side)} · {o.direction === "buy" ? "Покупка" : "Продажа"}{" "}
+                {formatOutcomeLabel(o.side, outcomeLabels?.[o.side])} ·{" "}
+                {o.direction === "buy" ? "Покупка" : "Продажа"}{" "}
                 · {formatPrice(Number(o.price))} · {o.remaining} долей
               </span>
             </div>
@@ -126,8 +130,4 @@ export function OpenOrdersList({
       )}
     </div>
   );
-}
-
-function sideLabel(side: OutcomeSide | string) {
-  return side === "yes" ? "Да" : "Нет";
 }

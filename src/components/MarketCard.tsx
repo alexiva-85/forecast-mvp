@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { MarketWithPrice } from "@/lib/types";
 import { categoryLabel, formatPrice, formatClosesAt } from "@/lib/markets";
+import {
+  getMultiOutcomeAccent,
+  MULTI_OUTCOME_CARD_PREVIEW,
+} from "@/lib/multi-outcome-styles";
 
 export function MarketCard({
   market,
@@ -12,6 +16,9 @@ export function MarketCard({
   const isMulti =
     market.outcome_mode === "multi" || (market.outcomes?.length ?? 0) > 2;
   const noPrice = Math.round((1 - market.yes_price) * 100) / 100;
+  const sortedOutcomes = [...(market.outcomes ?? [])].sort(
+    (a, b) => a.sort_order - b.sort_order,
+  );
 
   return (
     <Link
@@ -58,21 +65,10 @@ export function MarketCard({
         </div>
       )}
       {isMulti ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {market.outcomes.map((outcome) => (
-            <div
-              key={outcome.outcome_key}
-              className="min-w-[5.5rem] flex-1 rounded-lg bg-zinc-800/80 px-2 py-2 text-center"
-            >
-              <p className="truncate text-xs text-zinc-400">{outcome.label}</p>
-              <p className="text-sm font-semibold text-emerald-400">
-                {formatPrice(
-                  market.outcome_prices[outcome.outcome_key] ?? 0.5,
-                )}
-              </p>
-            </div>
-          ))}
-        </div>
+        <MultiOutcomeCardOutcomes
+          outcomes={sortedOutcomes}
+          prices={market.outcome_prices}
+        />
       ) : (
         <div className="mt-4 flex gap-3">
           <div className="flex-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-center">
@@ -90,5 +86,49 @@ export function MarketCard({
         </div>
       )}
     </Link>
+  );
+}
+
+function MultiOutcomeCardOutcomes({
+  outcomes,
+  prices,
+}: {
+  outcomes: MarketWithPrice["outcomes"];
+  prices: Record<string, number>;
+}) {
+  const visible = outcomes.slice(0, MULTI_OUTCOME_CARD_PREVIEW);
+  const hiddenCount = outcomes.length - visible.length;
+
+  return (
+    <ul className="mt-4 space-y-1.5" aria-label="Исходы">
+      {visible.map((outcome, index) => {
+        const accent = getMultiOutcomeAccent(index);
+        return (
+          <li
+            key={outcome.outcome_key}
+            className={`flex items-center gap-2 rounded-md border border-zinc-800/80 bg-zinc-800/50 py-1.5 pl-2 pr-2.5 border-l-2 ${accent.border}`}
+          >
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`}
+              aria-hidden
+            />
+            <span className="min-w-0 flex-1 truncate text-xs text-zinc-200">
+              {outcome.label}
+            </span>
+            <span
+              className={`shrink-0 text-sm font-semibold tabular-nums ${accent.price}`}
+            >
+              {formatPrice(prices[outcome.outcome_key] ?? 0.5)}
+            </span>
+          </li>
+        );
+      })}
+      {hiddenCount > 0 && (
+        <li className="pt-0.5 text-center text-[11px] leading-tight text-zinc-500">
+          + ещё {hiddenCount}{" "}
+          {hiddenCount === 1 ? "исход" : hiddenCount < 5 ? "исхода" : "исходов"}
+        </li>
+      )}
+    </ul>
   );
 }

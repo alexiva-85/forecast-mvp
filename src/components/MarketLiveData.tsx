@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/markets";
+import { formatOutcomeLabel } from "@/lib/outcomes";
 
 type BookRow = {
   side: string;
@@ -23,11 +24,20 @@ export function MarketLiveData({
   marketId,
   initialOrders,
   initialTrades,
+  outcomeLabels = {},
+  isMulti = false,
 }: {
   marketId: string;
   initialOrders: BookRow[];
   initialTrades: TradeRow[];
+  outcomeLabels?: Record<string, string>;
+  isMulti?: boolean;
 }) {
+  const outcomeColumn = isMulti ? "Исход" : "Сторона";
+
+  function labelFor(side: string) {
+    return formatOutcomeLabel(side, outcomeLabels?.[side]);
+  }
   const [orders, setOrders] = useState(initialOrders);
   const [trades, setTrades] = useState(initialTrades);
 
@@ -111,7 +121,7 @@ export function MarketLiveData({
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-zinc-500">
-                <th className="pb-2">Сторона</th>
+                <th className="pb-2">{outcomeColumn}</th>
                 <th className="pb-2">Тип</th>
                 <th className="pb-2">Цена</th>
                 <th className="pb-2 text-right">Объём</th>
@@ -123,7 +133,7 @@ export function MarketLiveData({
                   key={`${o.side}-${o.direction}-${o.price}-${i}`}
                   className="border-t border-zinc-800/50"
                 >
-                  <td className="py-2">{o.side === "yes" ? "Да" : "Нет"}</td>
+                  <td className="py-2">{labelFor(o.side)}</td>
                   <td className="py-2">
                     {o.direction === "buy" ? "Покупка" : "Продажа"}
                   </td>
@@ -147,7 +157,7 @@ export function MarketLiveData({
                 className="flex justify-between border-b border-zinc-800/50 pb-2"
               >
                 <span>
-                  {t.side === "yes" ? "Да" : "Нет"} · {formatPrice(t.price)}
+                  {labelFor(t.side)} · {formatPrice(t.price)}
                 </span>
                 <span className="text-zinc-500">
                   {t.size} долей

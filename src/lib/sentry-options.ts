@@ -1,4 +1,8 @@
 import type { BrowserOptions, EdgeOptions, NodeOptions } from "@sentry/nextjs";
+import {
+  sentryBeforeSend,
+  sentryClientDenyUrls,
+} from "@/lib/sentry-filters";
 
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
@@ -31,5 +35,9 @@ export function getEdgeSentryOptions(): EdgeOptions {
 }
 
 export function getClientSentryOptions(): BrowserOptions {
-  return { ...shared };
+  return {
+    ...shared,
+    denyUrls: sentryClientDenyUrls,
+    beforeSend: sentryBeforeSend,
+  };
 }

@@ -145,10 +145,39 @@ export async function grantTestShares(formData: FormData) {
       return { error: mapAdminError(error.message) };
     }
 
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/markets");
     revalidatePath("/portfolio");
     revalidatePath(`/market/${marketSlug}`);
     return {
-      success: `Начислено ${shares} долей «${outcomeKey}» на /market/${marketSlug}`,
+      success: `Начислено ${shares} долей «${outcomeKey}». Рынок скрыт из каталога (тестовый) — опубликуйте во вкладке «Тестовые» в /admin/markets`,
+    };
+  });
+}
+
+export async function publishMarket(marketSlug: string) {
+  return withSentryServerAction("publishMarket", async () => {
+    const slug = marketSlug.trim().toLowerCase();
+    if (!slug) {
+      return { error: "Укажите slug рынка" };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_publish_market", {
+      p_market_slug: slug,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/markets");
+    revalidatePath(`/market/${slug}`);
+    return {
+      success: "Рынок в публичном каталоге на главной",
     };
   });
 }
@@ -193,7 +222,7 @@ function mapAdminError(message: string): string {
     return "Добавьте хотя бы один пункт чеклиста";
   }
   if (message.includes("duplicate key") || message.includes("markets_slug_key")) {
-    return "Рынок с таким slug уже существует";
+    return "Рынок с таким slug уже есть. Откройте /admin/markets?tab=sandbox или перейдите на /market/<slug>";
   }
   if (message.includes("Too many tags")) {
     return "Не более 8 тегов";

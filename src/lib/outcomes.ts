@@ -11,6 +11,14 @@ export function formatOutcomeLabel(
   return outcomeKey;
 }
 
+export function buildOutcomeLabelMap(
+  outcomes: MarketOutcome[],
+): Record<string, string> {
+  return Object.fromEntries(
+    outcomes.map((o) => [o.outcome_key, o.label]),
+  );
+}
+
 export async function getMarketOutcomes(
   supabase: SupabaseClient,
   marketId: string,

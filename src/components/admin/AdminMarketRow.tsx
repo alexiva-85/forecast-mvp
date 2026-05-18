@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin";
 import { categoryLabel, formatClosesAt } from "@/lib/markets";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
+import { AdminMarketPublishButton } from "@/components/admin/AdminMarketPublishButton";
 
 export function AdminMarketRow({ market }: { market: AdminMarket }) {
   const resolveHref = `/admin/resolve/${market.slug}`;
@@ -64,6 +65,9 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
           )}
         </section>
         <section className="flex shrink-0 flex-col items-end gap-2">
+          {market.is_sandbox && (
+            <AdminMarketPublishButton slug={market.slug} />
+          )}
           <Link
             href={`/market/${market.slug}`}
             className="text-xs text-emerald-400 hover:underline"

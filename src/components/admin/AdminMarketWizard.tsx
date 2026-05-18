@@ -147,7 +147,13 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     startTransition(async () => {
       const result = await createMarket(formData);
       if (result.error) setMessage(result.error);
-      else setMessage(`Рынок опубликован: /market/${result.slug}`);
+      else if (isSandbox || isMultiOutcome) {
+        setMessage(
+          `Тестовый рынок создан (не в каталоге на главной): /market/${result.slug}. После проверки — «В каталог» во вкладке «Тестовые».`,
+        );
+      } else {
+        setMessage(`Рынок в каталоге: /market/${result.slug}`);
+      }
     });
   }
 
@@ -380,10 +386,10 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
           </footer>
           {message && (
             <p
-              className={`text-sm ${message.includes("опубликован") ? "text-emerald-400" : "text-rose-400"}`}
+              className={`text-sm ${message.includes("каталоге") || message.includes("создан") ? "text-emerald-400" : "text-rose-400"}`}
             >
               {message}
-              {message.includes("опубликован") && (
+              {(message.includes("каталоге") || message.includes("создан")) && (
                 <>
                   {" "}
                   <Link href={`/market/${slug}`} className="underline">
