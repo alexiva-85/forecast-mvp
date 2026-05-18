@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AdminFeeSettings } from "@/components/admin/AdminFeeSettings";
+import { AdminGrantTestShares } from "@/components/admin/AdminGrantTestShares";
 import { getPlatformSettings } from "@/lib/platform";
 
 export default async function AdminSettingsPage() {
@@ -21,6 +22,8 @@ export default async function AdminSettingsPage() {
         tradeFeeRate={platform.tradeFeeRate}
         feeBalance={platform.feeBalance}
       />
+
+      <AdminGrantTestShares />
 
       <article className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 text-sm">
         <h3 className="font-medium text-zinc-300">Лимиты (G2)</h3>

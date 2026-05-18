@@ -213,6 +213,24 @@ const checks = [
     },
   },
   {
+    name: "B7 — admin_grant_test_shares",
+    async run() {
+      const res = await rpc("admin_grant_test_shares", {
+        p_user_email: "nobody@forecast.local",
+        p_market_slug: "missing",
+        p_outcome_key: "o1",
+        p_shares: 1,
+      });
+      return (
+        res.code === "P0001" ||
+        res.message?.includes("Admin only") ||
+        res.message?.includes("Not authenticated") ||
+        res.message?.includes("User not found") ||
+        res.message?.includes("Market not found")
+      );
+    },
+  },
+  {
     name: "B7 — market_outcomes",
     async run() {
       const res = await fetch(

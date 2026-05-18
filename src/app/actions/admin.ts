@@ -118,6 +118,41 @@ export async function adminResolveMarket(
   });
 }
 
+export async function grantTestShares(formData: FormData) {
+  return withSentryServerAction("grantTestShares", async () => {
+    const supabase = await createClient();
+    const userEmail = (formData.get("userEmail") as string).trim();
+    const marketSlug = (formData.get("marketSlug") as string).trim().toLowerCase();
+    const outcomeKey = (formData.get("outcomeKey") as string).trim().toLowerCase();
+    const shares = Number(formData.get("shares"));
+
+    if (!userEmail || !marketSlug || !outcomeKey) {
+      return { error: "Заполните все поля" };
+    }
+
+    if (!Number.isFinite(shares) || shares <= 0) {
+      return { error: "Укажите количество долей" };
+    }
+
+    const { error } = await supabase.rpc("admin_grant_test_shares", {
+      p_user_email: userEmail,
+      p_market_slug: marketSlug,
+      p_outcome_key: outcomeKey,
+      p_shares: shares,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/portfolio");
+    revalidatePath(`/market/${marketSlug}`);
+    return {
+      success: `Начислено ${shares} долей «${outcomeKey}» на /market/${marketSlug}`,
+    };
+  });
+}
+
 export async function setTradeFeeRate(ratePercent: number) {
   return withSentryServerAction("setTradeFeeRate", async () => {
     const supabase = await createClient();
@@ -177,6 +212,15 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Invalid outcome key")) {
     return "Ключ исхода: латиница, цифры и дефисы";
+  }
+  if (message.includes("User not found")) {
+    return "Пользователь с таким email не найден";
+  }
+  if (message.includes("Only sandbox markets")) {
+    return "Только для тестовых рынков (sandbox)";
+  }
+  if (message.includes("Invalid share amount")) {
+    return "Некорректное количество долей";
   }
   reportUnexpectedRpcError("admin", message);
   return message;
