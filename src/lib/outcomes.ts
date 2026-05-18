@@ -19,6 +19,52 @@ export function buildOutcomeLabelMap(
   );
 }
 
+export async function getOutcomeLabelMapsByMarketId(
+  supabase: SupabaseClient,
+  marketIds: string[],
+): Promise<Record<string, Record<string, string>>> {
+  const uniqueIds = [...new Set(marketIds)];
+  if (uniqueIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("market_outcomes")
+    .select("market_id, outcome_key, label")
+    .in("market_id", uniqueIds);
+
+  if (error) throw error;
+
+  const maps: Record<string, Record<string, string>> = {};
+  for (const row of data ?? []) {
+    const marketId = row.market_id as string;
+    if (!maps[marketId]) maps[marketId] = {};
+    maps[marketId][row.outcome_key as string] = row.label as string;
+  }
+  return maps;
+}
+
+export async function getOutcomeLabelMapsByMarketSlug(
+  supabase: SupabaseClient,
+  marketIds: string[],
+): Promise<Record<string, Record<string, string>>> {
+  const byId = await getOutcomeLabelMapsByMarketId(supabase, marketIds);
+  const ids = Object.keys(byId);
+  if (ids.length === 0) return {};
+
+  const { data: markets, error } = await supabase
+    .from("markets")
+    .select("id, slug")
+    .in("id", ids);
+
+  if (error) throw error;
+
+  const bySlug: Record<string, Record<string, string>> = {};
+  for (const market of markets ?? []) {
+    const labels = byId[market.id];
+    if (labels) bySlug[market.slug] = labels;
+  }
+  return bySlug;
+}
+
 export async function getMarketOutcomes(
   supabase: SupabaseClient,
   marketId: string,

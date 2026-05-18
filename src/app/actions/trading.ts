@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateAccountPaths } from "@/lib/revalidate-account";
 import { createClient } from "@/lib/supabase/server";
 import {
   reportUnexpectedRpcError,
@@ -46,7 +47,7 @@ export async function placeMarketOrder(formData: FormData) {
     const slug = formData.get("slug") as string;
     revalidatePath("/");
     revalidatePath(`/market/${slug}`);
-    revalidatePath("/portfolio");
+    revalidateAccountPaths();
 
     const row = data as {
       filled: number;
@@ -99,6 +100,7 @@ export async function placeOrder(formData: FormData) {
     const slug = formData.get("slug") as string;
     revalidatePath("/");
     revalidatePath(`/market/${slug}`);
+    revalidateAccountPaths();
     return { success: true };
   });
 }
@@ -122,7 +124,7 @@ export async function cancelOrder(orderId: string, slug?: string) {
       return { error: mapDbError(error.message) };
     }
 
-    revalidatePath("/portfolio");
+    revalidateAccountPaths();
     if (slug) {
       revalidatePath(`/market/${slug}`);
     }
@@ -144,7 +146,7 @@ export async function redeemPositions(marketId: string, slug: string) {
 
     revalidatePath("/");
     revalidatePath(`/market/${slug}`);
-    revalidatePath("/portfolio");
+    revalidateAccountPaths();
     return { success: true, payout: data as number };
   });
 }

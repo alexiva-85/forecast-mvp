@@ -7,6 +7,7 @@ import {
   sandboxBadgeClass,
 } from "@/lib/admin";
 import { categoryLabel, formatClosesAt } from "@/lib/markets";
+import { formatOutcomeLabel, resolvedOutcomeKey } from "@/lib/outcomes";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import { AdminMarketPublishButton } from "@/components/admin/AdminMarketPublishButton";
 
@@ -52,9 +53,10 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
             <span>Оборот: {formatAdminVolume(market.stats.volume_usd)}</span>
             <span>Сделок: {market.stats.trade_count}</span>
             <span>Ордеров: {market.stats.open_orders}</span>
-            {market.resolved_side && (
+            {resolvedOutcomeKey(market) && (
               <span className="text-amber-400/90">
-                Исход: {market.resolved_side === "yes" ? "Да" : "Нет"}
+                Исход:{" "}
+                {formatOutcomeLabel(resolvedOutcomeKey(market)!)}
               </span>
             )}
           </p>

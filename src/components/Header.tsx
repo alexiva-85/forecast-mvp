@@ -29,8 +29,11 @@ export async function Header() {
             Рынки
           </Link>
           {user && (
-            <Link href="/portfolio" className="transition-colors hover:text-white">
-              Портфель
+            <Link
+              href="/portfolio"
+              className="transition-colors hover:text-white"
+            >
+              Кабинет
             </Link>
           )}
           {profile?.is_admin && (
@@ -42,9 +45,12 @@ export async function Header() {
         <div className="flex items-center gap-3 text-sm">
           {user && profile ? (
             <>
-              <span className="hidden text-zinc-500 sm:inline">
+              <Link
+                href="/profile"
+                className="hidden text-zinc-500 transition-colors hover:text-white sm:inline"
+              >
                 {profile.display_name ?? user.email}
-              </span>
+              </Link>
               <span className="rounded-full bg-emerald-500/15 px-3 py-1 font-medium text-emerald-400">
                 $
                 {Number(profile.balance).toLocaleString("ru-RU", {

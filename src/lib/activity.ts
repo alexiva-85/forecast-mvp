@@ -1,8 +1,13 @@
+import { formatOutcomeLabel } from "@/lib/outcomes";
+import { formatSharesAtPrice } from "@/lib/portfolio-ui";
+
 export type ActivityEventType =
   | "trade_buy"
   | "trade_sell"
   | "order_cancelled"
   | "redeem";
+
+export type ActivityBadgeVariant = "buy" | "sell" | "payout" | "cancel";
 
 export interface ActivityRow {
   event_id: string;
@@ -18,45 +23,142 @@ export interface ActivityRow {
   fee: number | null;
 }
 
+export interface ActivityViewModel {
+  badgeLabel: string;
+  badgeVariant: ActivityBadgeVariant;
+  detailLine: string | null;
+  marketSlug: string | null;
+  marketTitle: string | null;
+}
+
 const TYPE_LABELS: Record<ActivityEventType, string> = {
   trade_buy: "Покупка",
   trade_sell: "Продажа",
-  order_cancelled: "Отмена ордера",
+  order_cancelled: "Отмена",
   redeem: "Выплата",
+};
+
+const BADGE_VARIANT: Record<ActivityEventType, ActivityBadgeVariant> = {
+  trade_buy: "buy",
+  trade_sell: "sell",
+  order_cancelled: "cancel",
+  redeem: "payout",
 };
 
 export function activityTypeLabel(type: ActivityEventType): string {
   return TYPE_LABELS[type] ?? type;
 }
 
-export function formatActivityDetail(row: ActivityRow): string {
-  const outcome =
-    row.side === "yes" ? "Да" : row.side === "no" ? "Нет" : null;
+function outcomeLabelForRow(
+  row: ActivityRow,
+  outcomeLabelsBySlug?: Record<string, Record<string, string>>,
+): string | null {
+  if (!row.side) return null;
+  const labelMap =
+    row.market_slug && outcomeLabelsBySlug
+      ? outcomeLabelsBySlug[row.market_slug]
+      : undefined;
+  return formatOutcomeLabel(row.side, labelMap?.[row.side]);
+}
+
+function buildTradeDetailLine(
+  row: ActivityRow,
+  outcomeLabelsBySlug?: Record<string, Record<string, string>>,
+): string | null {
+  const outcome = outcomeLabelForRow(row, outcomeLabelsBySlug);
+  const parts: string[] = [];
+
+  if (row.market_title) parts.push(row.market_title);
+  if (outcome) parts.push(outcome);
+  if (row.size != null && row.price != null) {
+    parts.push(formatSharesAtPrice(row.size, row.price));
+  }
+
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+export function describeActivity(
+  row: ActivityRow,
+  outcomeLabelsBySlug?: Record<string, Record<string, string>>,
+): ActivityViewModel {
+  const badgeLabel = activityTypeLabel(row.event_type);
+  const badgeVariant = BADGE_VARIANT[row.event_type];
 
   switch (row.event_type) {
     case "trade_buy":
     case "trade_sell":
-      if (row.price != null && row.size != null && outcome) {
-        return `${outcome} · ${row.size} @ ${(row.price * 100).toFixed(0)}¢`;
+      return {
+        badgeLabel,
+        badgeVariant,
+        detailLine: buildTradeDetailLine(row, outcomeLabelsBySlug),
+        marketSlug: row.market_slug,
+        marketTitle: row.market_title,
+      };
+    case "order_cancelled": {
+      const outcome = outcomeLabelForRow(row, outcomeLabelsBySlug);
+      const parts: string[] = [];
+      if (row.market_title) parts.push(row.market_title);
+      if (outcome) parts.push(outcome);
+      if (row.size != null && row.price != null) {
+        parts.push(formatSharesAtPrice(row.size, row.price));
       }
-      return outcome ?? "Сделка";
-    case "order_cancelled":
-      if (row.price != null && row.size != null && outcome) {
-        const dir = row.direction === "buy" ? "покупка" : "продажа";
-        return `${dir} ${outcome} · ${row.size} @ ${(row.price * 100).toFixed(0)}¢`;
-      }
-      return "Ордер снят";
-    case "redeem":
-      return "Выигрышные доли";
+      return {
+        badgeLabel,
+        badgeVariant,
+        detailLine:
+          parts.length > 0 ? parts.join(" · ") : "Заявка снята",
+        marketSlug: row.market_slug,
+        marketTitle: row.market_title,
+      };
+    }
+    case "redeem": {
+      const outcome = outcomeLabelForRow(row, outcomeLabelsBySlug);
+      const parts: string[] = [];
+      if (row.market_title) parts.push(row.market_title);
+      if (outcome) parts.push(outcome);
+      return {
+        badgeLabel,
+        badgeVariant,
+        detailLine:
+          parts.length > 0
+            ? parts.join(" · ")
+            : "Выигрышные доли",
+        marketSlug: row.market_slug,
+        marketTitle: row.market_title,
+      };
+    }
     default:
-      return "";
+      return {
+        badgeLabel,
+        badgeVariant,
+        detailLine: null,
+        marketSlug: row.market_slug,
+        marketTitle: row.market_title,
+      };
   }
+}
+
+/** @deprecated Use describeActivity for UI; kept for tests that assert detail strings. */
+export function formatActivityDetail(
+  row: ActivityRow,
+  outcomeLabelsBySlug?: Record<string, Record<string, string>>,
+): string {
+  const view = describeActivity(row, outcomeLabelsBySlug);
+  if (view.detailLine) return view.detailLine;
+  return view.badgeLabel;
 }
 
 export function formatActivityAmount(amount: number | null): string {
   if (amount == null) return "—";
   const sign = amount >= 0 ? "+" : "";
   return `${sign}$${amount.toFixed(2)}`;
+}
+
+export function activityAmountClass(amount: number | null): string {
+  if (amount == null) return "text-zinc-600";
+  if (amount > 0) return "text-emerald-400";
+  if (amount < 0) return "text-zinc-300";
+  return "text-zinc-500";
 }
 
 export function formatActivityDate(iso: string): string {

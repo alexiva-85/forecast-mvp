@@ -148,7 +148,8 @@ export async function grantTestShares(formData: FormData) {
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/markets");
-    revalidatePath("/portfolio");
+    const { revalidateAccountPaths } = await import("@/lib/revalidate-account");
+    revalidateAccountPaths();
     revalidatePath(`/market/${marketSlug}`);
     return {
       success: `Начислено ${shares} долей «${outcomeKey}». Рынок скрыт из каталога (тестовый) — опубликуйте во вкладке «Тестовые» в /admin/markets`,
