@@ -198,7 +198,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 
 **Env:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только в Vercel / `.env.local`, не в git.
 
-**Мониторинг (G4):** `NEXT_PUBLIC_SENTRY_DSN` в Vercel Production/Preview; для читаемых stack trace — `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` (секрет, только Vercel). Логи runtime: Vercel → Project → Logs.
+**Мониторинг (G4):** `NEXT_PUBLIC_SENTRY_DSN` в Vercel Production/Preview; для читаемых stack trace — `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` (секрет, только Vercel). Приёмка ошибок: `SENTRY_TEST_TOKEN` + `/sentry-example-page?token=…` (см. README). Логи runtime: Vercel → Project → Logs.
 
 ---
 

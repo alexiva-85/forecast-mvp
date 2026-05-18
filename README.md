@@ -214,10 +214,25 @@ where id = 'ВАШ_UUID_ИЗ_auth.users';
    - `NEXT_PUBLIC_SENTRY_DSN` — DSN из Sentry
    - `SENTRY_ORG`, `SENTRY_PROJECT` — slug организации и проекта
    - `SENTRY_AUTH_TOKEN` — [Auth Token](https://sentry.io/settings/account/api/auth-tokens/) с scope `project:releases` (для source maps при `next build`)
+   - `SENTRY_TEST_TOKEN` — секрет для `/sentry-example-page` и `/api/sentry-test` (только production, для приёмки)
 3. После деплоя: **Sentry → Issues** — необработанные ошибки; **Performance** — трейсы (sample rate 10% в production).
 4. **Vercel → Logs** — runtime-логи (`console`, Server Actions); retention по плану Vercel.
 
 Без `NEXT_PUBLIC_SENTRY_DSN` приложение работает как раньше — SDK отключён.
+
+**Приёмка в production** (после деплоя):
+
+1. В Vercel Production задайте `SENTRY_TEST_TOKEN` — длинная случайная строка (секрет, не в git).
+2. Client error: откройте  
+   `https://forecast-mvp-pied.vercel.app/sentry-example-page?token=ВАШ_ТОКЕН`  
+   → **Trigger client error**.  
+   В Sentry → **Issues**: новая ошибка, `environment: production`, URL `/sentry-example-page`, stack trace.
+3. Server error: на той же странице → **Trigger server error (API)**  
+   или в браузере:  
+   `https://forecast-mvp-pied.vercel.app/api/sentry-test?token=ВАШ_ТОКЕН`  
+   → HTTP 500. В **Issues** — `Forecast Sentry acceptance test (server API)`.
+4. Без токена или с неверным токеном оба URL отдают **404** (событий в Sentry нет).
+5. Performance (опционально): транзакции могут сэмплироваться (~10% в production).
 
 ---
 
