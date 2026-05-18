@@ -9,6 +9,8 @@ export function MarketCard({
   market: MarketWithPrice;
   activeTag?: string;
 }) {
+  const isMulti =
+    market.outcome_mode === "multi" || (market.outcomes?.length ?? 0) > 2;
   const noPrice = Math.round((1 - market.yes_price) * 100) / 100;
 
   return (
@@ -55,20 +57,38 @@ export function MarketCard({
           ))}
         </div>
       )}
-      <div className="mt-4 flex gap-3">
-        <div className="flex-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-center">
-          <p className="text-xs text-emerald-500/80">Да</p>
-          <p className="text-lg font-semibold text-emerald-400">
-            {formatPrice(market.yes_price)}
-          </p>
+      {isMulti ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {market.outcomes.map((outcome) => (
+            <div
+              key={outcome.outcome_key}
+              className="min-w-[5.5rem] flex-1 rounded-lg bg-zinc-800/80 px-2 py-2 text-center"
+            >
+              <p className="truncate text-xs text-zinc-400">{outcome.label}</p>
+              <p className="text-sm font-semibold text-emerald-400">
+                {formatPrice(
+                  market.outcome_prices[outcome.outcome_key] ?? 0.5,
+                )}
+              </p>
+            </div>
+          ))}
         </div>
-        <div className="flex-1 rounded-lg bg-rose-500/10 px-3 py-2 text-center">
-          <p className="text-xs text-rose-500/80">Нет</p>
-          <p className="text-lg font-semibold text-rose-400">
-            {formatPrice(noPrice)}
-          </p>
+      ) : (
+        <div className="mt-4 flex gap-3">
+          <div className="flex-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-center">
+            <p className="text-xs text-emerald-500/80">Да</p>
+            <p className="text-lg font-semibold text-emerald-400">
+              {formatPrice(market.yes_price)}
+            </p>
+          </div>
+          <div className="flex-1 rounded-lg bg-rose-500/10 px-3 py-2 text-center">
+            <p className="text-xs text-rose-500/80">Нет</p>
+            <p className="text-lg font-semibold text-rose-400">
+              {formatPrice(noPrice)}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </Link>
   );
 }

@@ -84,7 +84,7 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
           .map((l) => l.trim())
           .filter(Boolean)
           .map((label, i) => ({
-            outcome_key: slugifyTitle(label) || `outcome-${i}`,
+            outcome_key: `o${i + 1}`,
             label,
             sort_order: i,
           }))
@@ -92,7 +92,15 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
           { outcome_key: "yes", label: "Да", sort_order: 0 },
           { outcome_key: "no", label: "Нет", sort_order: 1 },
         ],
-    outcome_prices: { yes: draft?.referenceYesPrice ?? 0.5, no: 0.5 },
+    outcome_prices: isMultiOutcome
+      ? Object.fromEntries(
+          outcomeLabels
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean)
+            .map((_, i) => [`o${i + 1}`, 0.5]),
+        )
+      : { yes: draft?.referenceYesPrice ?? 0.5, no: 0.5 },
   };
 
   function canGoStep2() {
