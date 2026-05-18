@@ -7,6 +7,7 @@ import {
   redeemPositions,
 } from "@/app/actions/trading";
 import type { MarketOrderResult } from "@/app/actions/trading";
+import { ResolutionAudit } from "@/components/ResolutionAudit";
 import { formatOutcomeLabel } from "@/lib/outcomes";
 import type { MarketWithPrice } from "@/lib/types";
 import { formatPrice } from "@/lib/markets";
@@ -167,6 +168,12 @@ export function TradePanel({
             )}
           </span>
         </p>
+        <ResolutionAudit
+          className="mt-4"
+          comment={market.resolve_comment}
+          proofUrl={market.resolve_proof_url}
+          resolvedAt={market.resolved_at}
+        />
         {userId && (
           <button
             type="button"

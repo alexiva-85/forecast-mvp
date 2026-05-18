@@ -99,12 +99,22 @@ export async function adminResolveMarket(
   marketId: string,
   outcomeKey: string,
   slug: string,
+  options?: { comment?: string; proofUrl?: string },
 ) {
   return withSentryServerAction("adminResolveMarket", async () => {
+    const comment = options?.comment?.trim() ?? "";
+    const proofUrl = options?.proofUrl?.trim() ?? "";
+
+    if (proofUrl && !/^https?:\/\//i.test(proofUrl)) {
+      return { error: "Ссылка должна начинаться с http:// или https://" };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.rpc("admin_resolve_market", {
       p_market_id: marketId,
       p_side: outcomeKey,
+      p_comment: comment || null,
+      p_proof_url: proofUrl || null,
     });
 
     if (error) {
@@ -153,6 +163,36 @@ export async function grantTestShares(formData: FormData) {
     revalidatePath(`/market/${marketSlug}`);
     return {
       success: `Начислено ${shares} долей «${outcomeKey}». Рынок скрыт из каталога (тестовый) — опубликуйте во вкладке «Тестовые» в /admin/markets`,
+    };
+  });
+}
+
+export async function closeMarket(marketSlug: string) {
+  return withSentryServerAction("closeMarket", async () => {
+    const slug = marketSlug.trim().toLowerCase();
+    if (!slug) {
+      return { error: "Укажите slug рынка" };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_close_market", {
+      p_market_slug: slug,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/markets");
+    revalidatePath("/admin/resolve");
+    revalidatePath(`/market/${slug}`);
+    revalidatePath(`/admin/resolve/${slug}`);
+    const { revalidateAccountPaths } = await import("@/lib/revalidate-account");
+    revalidateAccountPaths();
+    return {
+      success: "Торги закрыты — можно фиксировать исход",
     };
   });
 }
@@ -230,6 +270,18 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Market must be closed")) {
     return "Сначала закройте торги — резолв только для закрытых рынков";
+  }
+  if (message.includes("Market is not open")) {
+    return "Закрыть торги можно только для открытого рынка";
+  }
+  if (message.includes("Resolve comment too long")) {
+    return "Комментарий слишком длинный (макс. 2000 символов)";
+  }
+  if (message.includes("Proof URL too long")) {
+    return "Ссылка слишком длинная";
+  }
+  if (message.includes("Proof URL must start")) {
+    return "Ссылка должна начинаться с http:// или https://";
   }
   if (message.includes("Market not found")) {
     return "Рынок не найден";

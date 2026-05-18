@@ -27,6 +27,8 @@ export function AdminResolvePanel({
   const [pendingOutcomeKey, setPendingOutcomeKey] = useState<string | null>(
     null,
   );
+  const [resolveComment, setResolveComment] = useState("");
+  const [resolveProofUrl, setResolveProofUrl] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
   const allChecked =
@@ -45,11 +47,10 @@ export function AdminResolvePanel({
     if (!pendingOutcomeKey || !allChecked) return;
     setMessage(null);
     startTransition(async () => {
-      const result = await adminResolveMarket(
-        marketId,
-        pendingOutcomeKey,
-        slug,
-      );
+      const result = await adminResolveMarket(marketId, pendingOutcomeKey, slug, {
+        comment: resolveComment,
+        proofUrl: resolveProofUrl,
+      });
       if (result.error) {
         setMessage(result.error);
         setPendingOutcomeKey(null);
@@ -133,6 +134,30 @@ export function AdminResolvePanel({
             Подтвердите фиксацию исхода{" "}
             <strong>{pendingLabel}</strong>. Отменить будет нельзя.
           </p>
+          <section className="space-y-3">
+            <label className="block text-sm text-zinc-400">
+              Комментарий (необязательно)
+              <textarea
+                value={resolveComment}
+                onChange={(e) => setResolveComment(e.target.value)}
+                rows={3}
+                maxLength={2000}
+                placeholder="Кратко: почему выбран этот исход"
+                className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
+              />
+            </label>
+            <label className="block text-sm text-zinc-400">
+              Ссылка на доказательство (необязательно)
+              <input
+                type="url"
+                value={resolveProofUrl}
+                onChange={(e) => setResolveProofUrl(e.target.value)}
+                maxLength={2048}
+                placeholder="https://…"
+                className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
+              />
+            </label>
+          </section>
           <section className="flex flex-wrap gap-2">
             <button
               type="button"

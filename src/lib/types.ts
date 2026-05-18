@@ -28,6 +28,10 @@ export interface Market {
   resolution_checklist: string[];
   tags: string[];
   is_sandbox: boolean;
+  resolve_comment?: string | null;
+  resolve_proof_url?: string | null;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
   created_at: string;
 }
 

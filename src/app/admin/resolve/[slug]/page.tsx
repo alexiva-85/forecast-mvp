@@ -5,7 +5,9 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getMarketOutcomes, formatOutcomeLabel } from "@/lib/outcomes";
 import { parseChecklist, type MarketStatus } from "@/lib/types";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
+import { AdminMarketCloseButton } from "@/components/admin/AdminMarketCloseButton";
 import { AdminResolvePanel } from "@/components/admin/AdminResolvePanel";
+import { ResolutionAudit } from "@/components/ResolutionAudit";
 import { adminStatusLabel } from "@/lib/admin";
 
 export default async function AdminResolveMarketPage({
@@ -51,6 +53,11 @@ export default async function AdminResolveMarketPage({
             )}
           </strong>
         </p>
+        <ResolutionAudit
+          comment={market.resolve_comment}
+          proofUrl={market.resolve_proof_url}
+          resolvedAt={market.resolved_at}
+        />
       </section>
     );
   }
@@ -67,16 +74,17 @@ export default async function AdminResolveMarketPage({
         </header>
         <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6 text-sm text-amber-200/90">
           Резолв доступен только после закрытия торгов. Сейчас:{" "}
-          {adminStatusLabel(market.status as MarketStatus)}. Дождитесь даты
-          закрытия или закройте
-          торги вручную.
+          {adminStatusLabel(market.status as MarketStatus)}.
         </p>
-        <Link
-          href={`/market/${slug}`}
-          className="text-sm text-emerald-400 hover:underline"
-        >
-          Открыть рынок на сайте
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <AdminMarketCloseButton slug={market.slug} />
+          <Link
+            href={`/market/${slug}`}
+            className="text-sm text-emerald-400 hover:underline"
+          >
+            Открыть рынок на сайте
+          </Link>
+        </div>
       </section>
     );
   }

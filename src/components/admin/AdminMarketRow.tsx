@@ -9,11 +9,13 @@ import {
 import { categoryLabel, formatClosesAt } from "@/lib/markets";
 import { formatOutcomeLabel, resolvedOutcomeKey } from "@/lib/outcomes";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
+import { AdminMarketCloseButton } from "@/components/admin/AdminMarketCloseButton";
 import { AdminMarketPublishButton } from "@/components/admin/AdminMarketPublishButton";
 
 export function AdminMarketRow({ market }: { market: AdminMarket }) {
   const resolveHref = `/admin/resolve/${market.slug}`;
   const showResolve = market.status === "closed";
+  const showClose = market.status === "open";
 
   return (
     <li className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
@@ -67,6 +69,7 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
           )}
         </section>
         <section className="flex shrink-0 flex-col items-end gap-2">
+          {showClose && <AdminMarketCloseButton slug={market.slug} />}
           {market.is_sandbox && (
             <AdminMarketPublishButton slug={market.slug} />
           )}
