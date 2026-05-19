@@ -363,6 +363,37 @@ const EMPTY_PLATFORM_VOLUME: AdminPlatformVolume = {
   trades_30d: 0,
 };
 
+type AdminPlatformVolumeRow = {
+  volume_24h: number | string | null;
+  volume_7d: number | string | null;
+  volume_30d: number | string | null;
+  trades_24h: number | string | null;
+  trades_7d: number | string | null;
+  trades_30d: number | string | null;
+};
+
+type AdminTopMarketVolumeRow = {
+  market_id: string;
+  slug: string;
+  title: string;
+  category: string;
+  volume_usd: number | string | null;
+  trade_count: number | string | null;
+};
+
+type AdminAuditLogRow = {
+  id: string;
+  created_at: string;
+  admin_id: string;
+  admin_display_name: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_slug: string | null;
+  summary: string;
+  metadata: Record<string, unknown> | null;
+};
+
 export function volumePeriodLabel(period: AdminVolumePeriod): string {
   switch (period) {
     case "24h":
@@ -380,7 +411,7 @@ export async function fetchAdminPlatformVolume(
   const { data, error } = await supabase.rpc("admin_platform_volume");
   if (error) throw error;
 
-  const row = data?.[0];
+  const row = (data?.[0] ?? null) as AdminPlatformVolumeRow | null;
   if (!row) return { ...EMPTY_PLATFORM_VOLUME };
 
   return {
@@ -404,11 +435,12 @@ export async function fetchAdminTopMarkets(
   });
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    market_id: row.market_id as string,
-    slug: row.slug as string,
-    title: row.title as string,
-    category: row.category as string,
+  const rows = (data ?? []) as AdminTopMarketVolumeRow[];
+  return rows.map((row) => ({
+    market_id: row.market_id,
+    slug: row.slug,
+    title: row.title,
+    category: row.category,
     volume_usd: Number(row.volume_usd ?? 0),
     trade_count: Number(row.trade_count ?? 0),
   }));
@@ -470,17 +502,18 @@ export async function fetchAdminAuditLog(
   });
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    id: row.id as string,
-    created_at: row.created_at as string,
-    admin_id: row.admin_id as string,
-    admin_display_name: (row.admin_display_name as string | null) ?? null,
-    action: row.action as string,
-    entity_type: row.entity_type as string,
-    entity_id: (row.entity_id as string | null) ?? null,
-    entity_slug: (row.entity_slug as string | null) ?? null,
-    summary: row.summary as string,
-    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  const rows = (data ?? []) as AdminAuditLogRow[];
+  return rows.map((row) => ({
+    id: row.id,
+    created_at: row.created_at,
+    admin_id: row.admin_id,
+    admin_display_name: row.admin_display_name ?? null,
+    action: row.action,
+    entity_type: row.entity_type,
+    entity_id: row.entity_id ?? null,
+    entity_slug: row.entity_slug ?? null,
+    summary: row.summary,
+    metadata: row.metadata ?? {},
   }));
 }
 
