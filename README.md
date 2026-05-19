@@ -10,6 +10,8 @@
 | [docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md) | Реестр OSS и что переиспользовать |
 | [docs/RESEARCH.md](docs/RESEARCH.md) | Как мониторить новую информацию |
 | [docs/ADMIN.md](docs/ADMIN.md) | Админка: разделы и backlog после MVP |
+| [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md) | Спринты, handoff, когда открывать новый чат агента |
+| [docs/UX.md](docs/UX.md) | Правила UI (иерархия, кабинет, копирайт) |
 | [AGENTS.md](AGENTS.md) | Краткие инструкции для агента в Cursor |
 
 | | |

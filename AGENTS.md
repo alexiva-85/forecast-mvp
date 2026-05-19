@@ -11,9 +11,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Обязательно перед работой
 
 1. **[docs/PROJECT.md](docs/PROJECT.md)** — какой продукт строим, блоки разработки, статусы, правила.
-2. **[docs/ADMIN.md](docs/ADMIN.md)** — админка: текущие разделы и backlog после MVP.
-3. **[docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md)** — что брать из open source, что писать самим.
-4. **[docs/RESEARCH.md](docs/RESEARCH.md)** — когда проверять новую информацию (перед E5/E6 и раз в 2–4 недели).
+2. **[docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md)** — спринты, новый чат, handoff после крупного блока.
+3. **[docs/ADMIN.md](docs/ADMIN.md)** — админка: текущие разделы и backlog после MVP.
+4. **[docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md)** — что брать из open source, что писать самим.
+5. **[docs/RESEARCH.md](docs/RESEARCH.md)** — когда проверять новую информацию (перед E5/E6 и раз в 2–4 недели).
+6. **[docs/UX.md](docs/UX.md)** — при любых UI-задачах (иерархия, копирайт, кабинет).
 
 Публичное описание: [README.md](README.md).
 
@@ -32,6 +34,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Обновить статус блока в `docs/PROJECT.md` §4, если закрыт целый подпункт (например B3).
 - При новых OSS-зависимостях — запись в `docs/OPEN_SOURCE.md`.
 - При обзоре внешних источников — `docs/research/YYYY-MM-DD.md` по шаблону из `docs/RESEARCH.md`.
+
+### Крупный блок (обязательно)
+
+Если закрыт **крупный блок** (см. [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md) §1–§5):
+
+1. Пройти чеклист завершения в AGENT_WORKFLOW §5.
+2. В конце ответа выдать **handoff-бриф** (§6) — блок «Скопируйте в новый агент».
+3. **Рекомендовать новый чат** для следующего крупного блока, если пользователь не просит мелкую доработку в том же треде.
 
 ---
 
