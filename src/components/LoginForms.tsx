@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { safeAuthRedirect } from "@/lib/auth-redirect";
+import { buildAuthCallbackUrl } from "@/lib/auth-callback-url";
+import { mapMagicLinkError, mapOAuthStartError } from "@/lib/auth-errors";
+import type { Provider } from "@supabase/supabase-js";
 
 function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();
@@ -23,15 +26,19 @@ export function LoginForms({
   const [signupPasswordConfirm, setSignupPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(
     initialError === "auth"
-      ? "Неверный email или пароль"
+      ? "Не удалось войти. Попробуйте снова или выберите другой способ."
       : initialError
         ? decodeURIComponent(initialError)
         : null,
   );
   const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState<
-    "signin" | "signup" | "reset" | null
+    "signin" | "signup" | "reset" | "magic" | Provider | null
   >(null);
+
+  function authCallbackUrl(): string {
+    return buildAuthCallbackUrl(window.location.origin, nextPath);
+  }
 
   function mapSignInError(message: string, code?: string): string {
     const lower = message.toLowerCase();
@@ -180,6 +187,66 @@ export function LoginForms({
     setInfo(`Ссылка для сброса пароля отправлена на ${loginEmail}`);
   }
 
+  async function handleMagicLink() {
+    const loginEmail = normalizeEmail(email);
+    if (!loginEmail) {
+      setError("Сначала введите email в поле ниже");
+      return;
+    }
+
+    setError(null);
+    setInfo(null);
+    setPending("magic");
+
+    const supabase = createClient();
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: loginEmail,
+      options: {
+        emailRedirectTo: authCallbackUrl(),
+        shouldCreateUser: true,
+      },
+    });
+
+    setPending(null);
+
+    if (otpError) {
+      setError(mapMagicLinkError(otpError.message));
+      return;
+    }
+
+    setInfo(
+      `Ссылка для входа отправлена на ${loginEmail}. Откройте письмо и перейдите по ссылке.`,
+    );
+  }
+
+  async function handleOAuth(provider: Provider) {
+    setError(null);
+    setInfo(null);
+    setPending(provider);
+
+    const supabase = createClient();
+    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: authCallbackUrl() },
+    });
+
+    if (oauthError) {
+      setPending(null);
+      setError(mapOAuthStartError(oauthError.message));
+      return;
+    }
+
+    if (data?.url) {
+      window.location.assign(data.url);
+      return;
+    }
+
+    setPending(null);
+    setError("Не удалось открыть страницу входа. Попробуйте снова.");
+  }
+
+  const oauthBusy = pending === "google" || pending === "github";
+
   return (
     <>
       {info && (
@@ -193,7 +260,35 @@ export function LoginForms({
         </p>
       )}
 
-      <form onSubmit={handleSignIn} className="mt-8 space-y-4">
+      <div className="mt-8 space-y-2">
+        <button
+          type="button"
+          disabled={pending !== null}
+          onClick={() => handleOAuth("google")}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-600 bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+        >
+          {pending === "google" ? "Переходим…" : "Войти через Google"}
+        </button>
+        <button
+          type="button"
+          disabled={pending !== null}
+          onClick={() => handleOAuth("github")}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-600 bg-zinc-900 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+        >
+          {pending === "github" ? "Переходим…" : "Войти через GitHub"}
+        </button>
+      </div>
+
+      <div className="relative my-8">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-zinc-800" />
+        </div>
+        <p className="relative flex justify-center text-xs uppercase tracking-wide text-zinc-600">
+          <span className="bg-zinc-950 px-2">или email</span>
+        </p>
+      </div>
+
+      <form onSubmit={handleSignIn} className="space-y-4">
         <div>
           <label className="mb-1 block text-xs text-zinc-500">Email</label>
           <input
@@ -222,7 +317,17 @@ export function LoginForms({
           disabled={pending !== null}
           className="w-full rounded-lg bg-white py-2.5 font-medium text-zinc-900 hover:bg-zinc-200 disabled:opacity-50"
         >
-          {pending === "signin" ? "Входим…" : "Войти"}
+          {pending === "signin" ? "Входим…" : "Войти с паролем"}
+        </button>
+        <button
+          type="button"
+          disabled={pending !== null || oauthBusy}
+          onClick={handleMagicLink}
+          className="w-full rounded-lg border border-emerald-500/40 py-2.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50"
+        >
+          {pending === "magic"
+            ? "Отправляем ссылку…"
+            : "Войти по ссылке на email"}
         </button>
         <button
           type="button"

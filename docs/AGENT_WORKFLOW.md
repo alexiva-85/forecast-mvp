@@ -143,6 +143,7 @@ UX (если есть UI):
 | [PROJECT.md](./PROJECT.md) §4 | Статусы блоков |
 | [ADMIN.md](./ADMIN.md) | Backlog админки |
 | [UX.md](./UX.md) | Правила UI/копирайта (по мере появления) |
+| [DOMAIN_MIGRATION.md](./DOMAIN_MIGRATION.md) | Смена prod-домена (Vercel, Supabase, OAuth) |
 
 ---
 

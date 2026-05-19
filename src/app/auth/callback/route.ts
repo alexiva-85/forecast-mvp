@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeAuthRedirect } from "@/lib/auth-redirect";
+import { mapAuthCallbackError } from "@/lib/auth-errors";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
+  const oauthError = searchParams.get("error");
+  const oauthDescription = searchParams.get("error_description");
+
+  if (oauthError) {
+    const message = mapAuthCallbackError(oauthError, oauthDescription);
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(message)}`,
+    );
+  }
+
   const code = searchParams.get("code");
   const next = safeAuthRedirect(searchParams.get("next"));
 

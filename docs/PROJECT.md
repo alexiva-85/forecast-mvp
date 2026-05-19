@@ -109,7 +109,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 |----|--------|--------|
 | D1 | Email + пароль (Supabase Auth) | `done` |
 | D2 | Профиль, display name | `done` |
-| D3 | Magic link / OAuth | `planned` |
+| D3 | Magic link / OAuth | `done` |
 | D4 | KYC-заготовка, лимиты | `planned` |
 | D5 | История операций в портфеле | `done` |
 | D6 | Модерация, жалобы | `planned` |
@@ -194,9 +194,12 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | Supabase org | `emzovmecbkanpjkoqmku` |
 | Supabase project ref | `mookbnjtlqqljhlizipb` |
 | Vercel team | `aleksandr-ivashchenkos-projects` |
+| Prod (временно) | `https://forecast-mvp-pied.vercel.app` |
 | Локальный путь | `~/projects/forecast-mvp` |
 
 **Env:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только в Vercel / `.env.local`, не в git.
+
+**Переезд на рабочий домен:** [DOMAIN_MIGRATION.md](./DOMAIN_MIGRATION.md).
 
 **Мониторинг (G4):** `NEXT_PUBLIC_SENTRY_DSN` в Vercel Production/Preview; для читаемых stack trace — `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` (секрет, только Vercel). Приёмка ошибок: `SENTRY_TEST_TOKEN` + `/sentry-example-page?token=…` (см. README). Логи runtime: Vercel → Project → Logs.
 

@@ -11,7 +11,8 @@ export default async function LoginPage({
     <div className="mx-auto max-w-md px-4 py-12">
       <h1 className="text-2xl font-semibold text-white">Вход</h1>
       <p className="mt-2 text-sm text-zinc-500">
-        Тестовый счёт: $10&nbsp;000 виртуальных средств
+        Тестовый счёт: $10&nbsp;000 виртуальных средств. Вход через Google,
+        GitHub, ссылку на email или пароль.
       </p>
       {reset === "ok" && (
         <p className="mt-3 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">

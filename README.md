@@ -194,6 +194,41 @@ npm run db:migrate    # link + push + verify
 
 3. Authentication → Email → отключить **Confirm email** (для теста)
 
+### Вход: magic link и OAuth (D3)
+
+**Supabase Dashboard → Authentication → URL Configuration**
+
+| Поле | Значение |
+|------|----------|
+| Site URL | `https://forecast-mvp-pied.vercel.app` (локально: `http://127.0.0.1:3000`) |
+| Redirect URLs | `http://127.0.0.1:3000/auth/callback`, `https://forecast-mvp-pied.vercel.app/auth/callback` |
+
+**Magic link** — включён вместе с Email (кнопка «Войти по ссылке на email» на `/login`). Письма идут через SMTP Supabase; для production настройте [custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) при необходимости.
+
+**OAuth (Google / GitHub)**
+
+1. Создать OAuth client:
+   - [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth client ID (Web)
+   - [GitHub Developer settings](https://github.com/settings/developers) → OAuth App
+2. **Authorized redirect URI** (одинаковый для обоих):  
+   `https://mookbnjtlqqljhlizipb.supabase.co/auth/v1/callback`
+3. Client ID и Secret — в Supabase Dashboard **или** одной командой:
+
+```bash
+export SUPABASE_ACCESS_TOKEN=sbp_...   # Account → Access Tokens
+export GOOGLE_CLIENT_ID=...
+export GOOGLE_CLIENT_SECRET=...
+export GITHUB_CLIENT_ID=...
+export GITHUB_CLIENT_SECRET=...
+bash scripts/configure-auth-oauth.sh
+```
+
+Агент не может создать OAuth-приложения в Google/GitHub за вас (нужен вход в ваши аккаунты). После того как client ID/secret есть — скрипт выше или вставка в Dashboard.
+
+**Vercel:** дополнительных env для OAuth не нужно — достаточно `NEXT_PUBLIC_SUPABASE_*`. После смены redirect URLs в Supabase пересобирать Vercel не обязательно.
+
+Локально письма magic link смотрите в Inbucket: `http://127.0.0.1:54324` (при `supabase start`).
+
 ### Сделать себя админом
 
 ```sql
@@ -208,6 +243,7 @@ where id = 'ВАШ_UUID_ИЗ_auth.users';
 
 - **Vercel:** импорт из GitHub, env `NEXT_PUBLIC_SUPABASE_*`  
 - Скрипт: `bash scripts/deploy-all.sh` (после `gh auth login`)
+- **Смена prod-домена:** [docs/DOMAIN_MIGRATION.md](docs/DOMAIN_MIGRATION.md)
 
 ### Мониторинг (Sentry + Vercel)
 
