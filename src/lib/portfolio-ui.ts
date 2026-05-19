@@ -31,6 +31,25 @@ export function describeOpenOrder(
   };
 }
 
+/** Публичная сделка на странице рынка (без направления покупателя). */
+export function describeMarketTrade(
+  side: string,
+  size: number,
+  price: number,
+  outcomeLabel?: string | null,
+): { actionLine: string; termsLine: string; notional: number } {
+  const outcome = formatOutcomeLabel(side, outcomeLabel);
+  return {
+    actionLine: `Сделка: ${outcome}`,
+    termsLine: formatSharesAtPrice(size, price),
+    notional: Math.round(size * price * 100) / 100,
+  };
+}
+
+export function formatTradeNotional(amount: number): string {
+  return `$${amount.toFixed(2)}`;
+}
+
 export const ACTIVITY_BADGE_CLASS: Record<
   "buy" | "sell" | "payout" | "cancel",
   string

@@ -6,7 +6,7 @@ import {
   formatActivityAmount,
   formatActivityDate,
 } from "@/lib/activity";
-import { ActivityBadge } from "@/components/ActivityBadge";
+import { UiListRow } from "@/components/UiListRow";
 
 export function ActivityHistory({
   activities,
@@ -31,46 +31,37 @@ export function ActivityHistory({
       <ul className="divide-y divide-zinc-800/80 rounded-xl border border-zinc-800 bg-zinc-900/40">
         {activities.map((row) => {
           const view = describeActivity(row, outcomeLabelsBySlug);
-          return (
-            <li
-              key={row.event_id}
-              className="flex items-start justify-between gap-4 px-4 py-3"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <ActivityBadge
-                    label={view.badgeLabel}
-                    variant={view.badgeVariant}
-                  />
-                  <span className="text-xs text-zinc-600">
-                    {formatActivityDate(row.event_at)}
-                  </span>
-                </div>
-                {view.detailLine && (
-                  <p className="mt-1 text-sm leading-snug text-zinc-300">
-                    {view.marketSlug ? (
-                      <Link
-                        href={`/market/${view.marketSlug}`}
-                        className="hover:text-emerald-400"
-                      >
-                        {view.detailLine}
-                      </Link>
-                    ) : (
-                      view.detailLine
-                    )}
-                  </p>
-                )}
-                {row.fee != null && row.fee > 0 && (
-                  <p className="mt-0.5 text-xs text-zinc-600">
-                    Комиссия ${row.fee.toFixed(2)}
-                  </p>
-                )}
-              </div>
-              <span
-                className={`shrink-0 text-sm font-semibold tabular-nums ${activityAmountClass(row.amount)}`}
+          const termsLine =
+            view.termsLine && view.marketSlug ? (
+              <Link
+                href={`/market/${view.marketSlug}`}
+                className="hover:text-emerald-400"
               >
-                {formatActivityAmount(row.amount)}
-              </span>
+                {view.termsLine}
+              </Link>
+            ) : (
+              view.termsLine
+            );
+
+          return (
+            <li key={row.event_id} className="px-4 py-3">
+              <UiListRow
+                actionLine={view.actionLine}
+                termsLine={termsLine}
+                meta={formatActivityDate(row.event_at)}
+                right={
+                  <span
+                    className={`text-sm font-semibold tabular-nums ${activityAmountClass(row.amount)}`}
+                  >
+                    {formatActivityAmount(row.amount)}
+                  </span>
+                }
+              />
+              {row.fee != null && row.fee > 0 && (
+                <p className="mt-1 text-right text-xs text-zinc-600">
+                  Комиссия ${row.fee.toFixed(2)}
+                </p>
+              )}
             </li>
           );
         })}

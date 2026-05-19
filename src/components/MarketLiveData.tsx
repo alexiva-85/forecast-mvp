@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { formatPrice } from "@/lib/markets";
+import {
+  describeMarketTrade,
+  describeOpenOrder,
+  formatTradeNotional,
+} from "@/lib/portfolio-ui";
 import { formatOutcomeLabel } from "@/lib/outcomes";
+import { UiListRow } from "@/components/UiListRow";
 
 type BookRow = {
   side: string;
@@ -25,19 +30,16 @@ export function MarketLiveData({
   initialOrders,
   initialTrades,
   outcomeLabels = {},
-  isMulti = false,
 }: {
   marketId: string;
   initialOrders: BookRow[];
   initialTrades: TradeRow[];
   outcomeLabels?: Record<string, string>;
-  isMulti?: boolean;
 }) {
-  const outcomeColumn = isMulti ? "Исход" : "Сторона";
-
   function labelFor(side: string) {
     return formatOutcomeLabel(side, outcomeLabels?.[side]);
   }
+
   const [orders, setOrders] = useState(initialOrders);
   const [trades, setTrades] = useState(initialTrades);
 
@@ -118,31 +120,30 @@ export function MarketLiveData({
         {!orders.length ? (
           <p className="text-sm text-zinc-600">Нет открытых заявок</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-zinc-500">
-                <th className="pb-2">{outcomeColumn}</th>
-                <th className="pb-2">Тип</th>
-                <th className="pb-2">Цена</th>
-                <th className="pb-2 text-right">Объём</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o, i) => (
-                <tr
-                  key={`${o.side}-${o.direction}-${o.price}-${i}`}
-                  className="border-t border-zinc-800/50"
-                >
-                  <td className="py-2">{labelFor(o.side)}</td>
-                  <td className="py-2">
-                    {o.direction === "buy" ? "Покупка" : "Продажа"}
-                  </td>
-                  <td className="py-2">{formatPrice(o.price)}</td>
-                  <td className="py-2 text-right">{o.remaining}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="divide-y divide-zinc-800/50">
+            {orders.map((o, i) => {
+              const { actionLine, termsLine } = describeOpenOrder(
+                o.direction as "buy" | "sell",
+                o.side,
+                o.remaining,
+                o.price,
+                labelFor(o.side),
+              );
+              return (
+                <li key={`${o.side}-${o.direction}-${o.price}-${i}`} className="py-2.5">
+                  <UiListRow
+                    actionLine={actionLine}
+                    termsLine={termsLine}
+                    right={
+                      <span className="text-sm font-semibold tabular-nums text-zinc-300">
+                        {o.remaining}
+                      </span>
+                    }
+                  />
+                </li>
+              );
+            })}
+          </ul>
         )}
       </LiveSection>
 
@@ -150,21 +151,32 @@ export function MarketLiveData({
         {!trades.length ? (
           <p className="text-sm text-zinc-600">Сделок пока нет</p>
         ) : (
-          <ul className="space-y-2 text-sm">
-            {trades.map((t) => (
-              <li
-                key={t.id}
-                className="flex justify-between border-b border-zinc-800/50 pb-2"
-              >
-                <span>
-                  {labelFor(t.side)} · {formatPrice(t.price)}
-                </span>
-                <span className="text-zinc-500">
-                  {t.size} долей
-                  {t.fee_amount > 0 && ` · ком. $${t.fee_amount.toFixed(2)}`}
-                </span>
-              </li>
-            ))}
+          <ul className="divide-y divide-zinc-800/50">
+            {trades.map((t) => {
+              const { actionLine, termsLine, notional } = describeMarketTrade(
+                t.side,
+                t.size,
+                t.price,
+                labelFor(t.side),
+              );
+              return (
+                <li key={t.id} className="py-2.5">
+                  <UiListRow
+                    actionLine={actionLine}
+                    termsLine={
+                      t.fee_amount > 0
+                        ? `${termsLine} · ком. $${t.fee_amount.toFixed(2)}`
+                        : termsLine
+                    }
+                    right={
+                      <span className="text-sm font-semibold tabular-nums text-zinc-400">
+                        {formatTradeNotional(notional)}
+                      </span>
+                    }
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
       </LiveSection>
@@ -185,7 +197,7 @@ function LiveSection({
         <h2 className="text-sm font-medium text-zinc-400">{title}</h2>
         <span className="inline-flex items-center gap-1 text-xs text-emerald-500/80">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          live
+          онлайн
         </span>
       </div>
       {children}

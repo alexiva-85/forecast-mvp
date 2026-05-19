@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { cancelOrder } from "@/app/actions/trading";
 import { describeOpenOrder } from "@/lib/portfolio-ui";
+import { UiListRow } from "@/components/UiListRow";
 import type { Order } from "@/lib/types";
 
 export type OpenOrderRow = Order & {
@@ -111,31 +112,38 @@ export function OpenOrdersList({
             Number(o.price),
             labelForOrder(o),
           );
+          const termsWithMarket =
+            showMarket && o.markets ? (
+              <>
+                <Link
+                  href={`/market/${o.markets.slug}`}
+                  className="hover:text-emerald-400"
+                >
+                  {o.markets.title}
+                </Link>
+                {" · "}
+                {termsLine}
+              </>
+            ) : (
+              termsLine
+            );
+
           return (
-            <li
-              key={o.id}
-              className="flex items-center justify-between gap-3 rounded-lg bg-zinc-950/50 px-3 py-2.5"
-            >
-              <div className="min-w-0">
-                {showMarket && o.markets && (
-                  <Link
-                    href={`/market/${o.markets.slug}`}
-                    className="mb-0.5 block truncate text-xs text-zinc-500 hover:text-emerald-400"
+            <li key={o.id} className="rounded-lg bg-zinc-950/50 px-3 py-2.5">
+              <UiListRow
+                actionLine={actionLine}
+                termsLine={termsWithMarket}
+                right={
+                  <button
+                    type="button"
+                    onClick={() => handleCancel(o.id, o.markets?.slug)}
+                    disabled={pending && cancellingId === o.id}
+                    className="rounded-md border border-zinc-700 px-2.5 py-1 text-xs text-zinc-400 hover:border-rose-500/50 hover:text-rose-400 disabled:opacity-50"
                   >
-                    {o.markets.title}
-                  </Link>
-                )}
-                <p className="text-sm font-medium text-white">{actionLine}</p>
-                <p className="text-xs text-zinc-500">{termsLine}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleCancel(o.id, o.markets?.slug)}
-                disabled={pending && cancellingId === o.id}
-                className="shrink-0 rounded-md border border-zinc-700 px-2.5 py-1 text-xs text-zinc-400 hover:border-rose-500/50 hover:text-rose-400 disabled:opacity-50"
-              >
-                {pending && cancellingId === o.id ? "..." : "Отменить"}
-              </button>
+                    {pending && cancellingId === o.id ? "..." : "Отменить"}
+                  </button>
+                }
+              />
             </li>
           );
         })}

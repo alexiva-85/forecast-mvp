@@ -4,9 +4,9 @@ import {
   getMarketBySlug,
   categoryLabel,
   formatPrice,
-  marketStatusLabel,
   formatClosesAt,
 } from "@/lib/markets";
+import { MarketStatusChip } from "@/components/MarketStatusChip";
 import { TradePanel } from "@/components/TradePanel";
 import { MarketLiveData } from "@/components/MarketLiveData";
 import { OpenOrdersList } from "@/components/OpenOrdersList";
@@ -85,14 +85,13 @@ export default async function MarketPage({
     })) ?? [];
 
   const outcomeLabels = buildOutcomeLabelMap(market.outcomes);
-  const isMulti = market.outcome_mode === "multi";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-2 flex items-center gap-2 text-sm text-zinc-500">
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
         <span>{categoryLabel(market.category)}</span>
         <span>·</span>
-        <span>{marketStatusLabel(market.status)}</span>
+        <MarketStatusChip status={market.status} />
         {formatClosesAt(market.closes_at) && (
           <>
             <span>·</span>
@@ -169,7 +168,6 @@ export default async function MarketPage({
             initialOrders={initialOrders}
             initialTrades={initialTrades}
             outcomeLabels={outcomeLabels}
-            isMulti={isMulti}
           />
         </div>
 

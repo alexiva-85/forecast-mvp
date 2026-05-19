@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { MarketWithPrice } from "@/lib/types";
+import { MarketStatusChip } from "@/components/MarketStatusChip";
 import { categoryLabel, formatPrice, formatClosesAt } from "@/lib/markets";
 import {
   getMultiOutcomeAccent,
@@ -25,20 +26,11 @@ export function MarketCard({
       href={`/market/${market.slug}`}
       className="group block rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 transition hover:border-zinc-600 hover:bg-zinc-900"
     >
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="rounded-md bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
           {categoryLabel(market.category)}
         </span>
-        {market.status === "closed" && (
-          <span className="rounded-md bg-zinc-700/80 px-2 py-0.5 text-xs text-zinc-300">
-            Торги закрыты
-          </span>
-        )}
-        {market.status === "resolved" && (
-          <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-xs text-amber-400">
-            Завершён
-          </span>
-        )}
+        <MarketStatusChip status={market.status} />
       </div>
       <h2 className="text-base font-medium leading-snug text-white group-hover:text-emerald-50">
         {market.title}

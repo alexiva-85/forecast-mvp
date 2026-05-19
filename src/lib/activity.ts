@@ -24,9 +24,9 @@ export interface ActivityRow {
 }
 
 export interface ActivityViewModel {
-  badgeLabel: string;
+  actionLine: string;
   badgeVariant: ActivityBadgeVariant;
-  detailLine: string | null;
+  termsLine: string | null;
   marketSlug: string | null;
   marketTitle: string | null;
 }
@@ -88,9 +88,9 @@ export function describeActivity(
     case "trade_buy":
     case "trade_sell":
       return {
-        badgeLabel,
+        actionLine: badgeLabel,
         badgeVariant,
-        detailLine: buildTradeDetailLine(row, outcomeLabelsBySlug),
+        termsLine: buildTradeDetailLine(row, outcomeLabelsBySlug),
         marketSlug: row.market_slug,
         marketTitle: row.market_title,
       };
@@ -103,9 +103,9 @@ export function describeActivity(
         parts.push(formatSharesAtPrice(row.size, row.price));
       }
       return {
-        badgeLabel,
+        actionLine: badgeLabel,
         badgeVariant,
-        detailLine:
+        termsLine:
           parts.length > 0 ? parts.join(" · ") : "Заявка снята",
         marketSlug: row.market_slug,
         marketTitle: row.market_title,
@@ -117,9 +117,9 @@ export function describeActivity(
       if (row.market_title) parts.push(row.market_title);
       if (outcome) parts.push(outcome);
       return {
-        badgeLabel,
+        actionLine: badgeLabel,
         badgeVariant,
-        detailLine:
+        termsLine:
           parts.length > 0
             ? parts.join(" · ")
             : "Выигрышные доли",
@@ -129,9 +129,9 @@ export function describeActivity(
     }
     default:
       return {
-        badgeLabel,
+        actionLine: badgeLabel,
         badgeVariant,
-        detailLine: null,
+        termsLine: null,
         marketSlug: row.market_slug,
         marketTitle: row.market_title,
       };
@@ -144,8 +144,8 @@ export function formatActivityDetail(
   outcomeLabelsBySlug?: Record<string, Record<string, string>>,
 ): string {
   const view = describeActivity(row, outcomeLabelsBySlug);
-  if (view.detailLine) return view.detailLine;
-  return view.badgeLabel;
+  if (view.termsLine) return view.termsLine;
+  return view.actionLine;
 }
 
 export function formatActivityAmount(amount: number | null): string {

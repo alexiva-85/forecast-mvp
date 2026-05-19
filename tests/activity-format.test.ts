@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { describeActivity } from "@/lib/activity";
 import type { ActivityRow } from "@/lib/activity";
-import { describeOpenOrder, formatShareCount } from "@/lib/portfolio-ui";
+import {
+  describeMarketTrade,
+  describeOpenOrder,
+  formatShareCount,
+  formatTradeNotional,
+} from "@/lib/portfolio-ui";
 
 function row(partial: Partial<ActivityRow> & Pick<ActivityRow, "event_type">): ActivityRow {
   return {
@@ -35,9 +40,9 @@ describe("describeActivity — multi-outcome labels", () => {
         market_slug: "btc",
       }),
     );
-    expect(view.badgeLabel).toBe("Покупка");
+    expect(view.actionLine).toBe("Покупка");
     expect(view.badgeVariant).toBe("buy");
-    expect(view.detailLine).toBe("Bitcoin · Да · 10 долей по 55¢");
+    expect(view.termsLine).toBe("Bitcoin · Да · 10 долей по 55¢");
   });
 
   it("uses outcome label from map for multi keys", () => {
@@ -52,8 +57,8 @@ describe("describeActivity — multi-outcome labels", () => {
       }),
       labelsBySlug,
     );
-    expect(view.badgeLabel).toBe("Продажа");
-    expect(view.detailLine).toBe("Выборы · Кандидат A · 5 долей по 40¢");
+    expect(view.actionLine).toBe("Продажа");
+    expect(view.termsLine).toBe("Выборы · Кандидат A · 5 долей по 40¢");
   });
 
   it("formats cancelled order detail", () => {
@@ -69,9 +74,9 @@ describe("describeActivity — multi-outcome labels", () => {
       }),
       labelsBySlug,
     );
-    expect(view.badgeLabel).toBe("Отмена");
+    expect(view.actionLine).toBe("Отмена");
     expect(view.badgeVariant).toBe("cancel");
-    expect(view.detailLine).toBe("Турнир · o3 · 2 доли по 60¢");
+    expect(view.termsLine).toBe("Турнир · o3 · 2 доли по 60¢");
   });
 });
 
@@ -93,5 +98,17 @@ describe("portfolio-ui helpers", () => {
     );
     expect(actionLine).toBe("Продать: Команда sandbox");
     expect(termsLine).toBe("5 долей по 50¢");
+  });
+
+  it("describeMarketTrade for public feed", () => {
+    const { actionLine, termsLine, notional } = describeMarketTrade(
+      "yes",
+      10,
+      0.55,
+    );
+    expect(actionLine).toBe("Сделка: Да");
+    expect(termsLine).toBe("10 долей по 55¢");
+    expect(notional).toBe(5.5);
+    expect(formatTradeNotional(notional)).toBe("$5.50");
   });
 });
