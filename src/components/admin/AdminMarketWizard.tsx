@@ -6,6 +6,7 @@ import { createMarket } from "@/app/actions/admin";
 import { slugifyTitle } from "@/lib/slug";
 import type { GammaMarketDraft } from "@/lib/gamma";
 import { MarketCard } from "@/components/MarketCard";
+import { AdminWizardQualityHints } from "@/components/admin/AdminWizardQualityHints";
 import type { MarketWithPrice } from "@/lib/types";
 
 const RULE_TEMPLATES = {
@@ -355,6 +356,11 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
 
       {step === 3 && (
         <section className="space-y-4">
+          <AdminWizardQualityHints
+            title={title}
+            closesAt={closesAt}
+            resolutionRules={resolutionRules}
+          />
           {isMultiOutcome && (
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-100/90">
               <p className="font-medium">Мульти-исход ({previewMarket.outcomes.length})</p>

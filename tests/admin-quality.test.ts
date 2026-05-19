@@ -32,7 +32,7 @@ function market(overrides: Partial<AdminMarket>): AdminMarket {
 describe("A7 — quality warnings", () => {
   it("flags short and vague titles", () => {
     const w = checkMarketDraftQuality({
-      title: "BTC может вырасти",
+      title: "BTC может?",
       resolutionRules: "Официальная цена на Binance BTCUSDT на 31.12.2026 23:59 UTC.",
     });
     expect(w.some((x) => x.code === "title_short")).toBe(true);

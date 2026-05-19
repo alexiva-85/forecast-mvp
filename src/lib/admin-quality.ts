@@ -20,7 +20,7 @@ const TITLE_MIN_LEN = 15;
 const RULES_MIN_LEN = 40;
 
 const VAGUE_RE =
-  /\b(может|возможно|скорее всего|вероятно|наверное|примерно|около)\b/i;
+  /(может|возможно|скорее всего|вероятно|наверное|примерно|около)/i;
 
 export function qualityWarningMeta(code: AdminQualityWarningCode): {
   label: string;
