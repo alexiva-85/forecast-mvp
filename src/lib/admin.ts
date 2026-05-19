@@ -484,6 +484,8 @@ export function adminAuditActionLabel(action: string): string {
       return "В каталог";
     case "user.grant_test_shares":
       return "Тестовые доли";
+    case "user.update":
+      return "Пользователь";
     case "platform.set_fee_rate":
       return "Комиссия";
     default:

@@ -110,7 +110,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | D1 | Email + пароль (Supabase Auth) | `done` |
 | D2 | Профиль, display name | `done` |
 | D3 | Magic link / OAuth | `done` |
-| D4 | KYC-заготовка, лимиты | `planned` |
+| D4 | KYC-заготовка, лимиты | `done` (статус KYC + множитель G2 в админке; без внешнего провайдера) |
 | D5 | История операций в портфеле | `done` |
 | D6 | Модерация, жалобы | `planned` |
 

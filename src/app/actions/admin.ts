@@ -7,6 +7,7 @@ import {
   withSentryServerAction,
 } from "@/lib/sentry-server-action";
 import type { MarketCategory } from "@/lib/types";
+import type { KycStatus } from "@/lib/admin-users";
 
 export async function createMarket(formData: FormData) {
   return withSentryServerAction("createMarket", async () => {
@@ -223,6 +224,33 @@ export async function publishMarket(marketSlug: string) {
   });
 }
 
+export async function updateUserModeration(input: {
+  userId: string;
+  tradingBlocked: boolean;
+  kycStatus: KycStatus;
+  moderationNote: string;
+  rateLimitMultiplier: number;
+}) {
+  return withSentryServerAction("updateUserModeration", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_update_user", {
+      p_user_id: input.userId,
+      p_trading_blocked: input.tradingBlocked,
+      p_kyc_status: input.kycStatus,
+      p_moderation_note: input.moderationNote.trim() || null,
+      p_rate_limit_multiplier: input.rateLimitMultiplier,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/audit");
+    return { success: true };
+  });
+}
+
 export async function setTradeFeeRate(ratePercent: number) {
   return withSentryServerAction("setTradeFeeRate", async () => {
     const supabase = await createClient();
@@ -296,7 +324,16 @@ function mapAdminError(message: string): string {
     return "Ключ исхода: латиница, цифры и дефисы";
   }
   if (message.includes("User not found")) {
-    return "Пользователь с таким email не найден";
+    return "Пользователь не найден";
+  }
+  if (message.includes("Trading suspended")) {
+    return "Торги заблокированы оператором";
+  }
+  if (message.includes("Invalid KYC status")) {
+    return "Некорректный статус KYC";
+  }
+  if (message.includes("Invalid rate limit multiplier")) {
+    return "Множитель лимита: от 0.01 до 10";
   }
   if (message.includes("Invalid share amount")) {
     return "Некорректное количество долей";

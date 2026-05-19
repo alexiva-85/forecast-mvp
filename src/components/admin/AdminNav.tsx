@@ -9,6 +9,7 @@ const links = [
   { href: "/admin/markets/new", label: "Создать", exact: false },
   { href: "/admin/resolve", label: "Резолв", exact: false },
   { href: "/admin/ideas", label: "Идеи", exact: false },
+  { href: "/admin/users", label: "Пользователи", exact: false },
   { href: "/admin/audit", label: "Журнал", exact: false },
   { href: "/admin/settings", label: "Настройки", exact: false },
 ] as const;
