@@ -165,6 +165,18 @@ const checks = [
     },
   },
   {
+    name: "A9 — admin_platform_volume",
+    async run() {
+      const res = await rpc("admin_platform_volume");
+      return (
+        res.code === "P0001" ||
+        res.message?.includes("Admin only") ||
+        res.message?.includes("Not authenticated") ||
+        Array.isArray(res)
+      );
+    },
+  },
+  {
     name: "B4 — place_market_order",
     async run() {
       const res = await rpc("place_market_order", {

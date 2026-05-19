@@ -4,21 +4,29 @@ import { requireAdmin } from "@/lib/admin-auth";
 import {
   buildAdminOverview,
   fetchAdminMarkets,
+  fetchAdminPlatformVolume,
+  fetchAdminTopMarketsByPeriod,
   formatAdminVolume,
 } from "@/lib/admin";
 import { AdminActionQueue } from "@/components/admin/AdminActionQueue";
 import { AdminQuickActions } from "@/components/admin/AdminQuickActions";
 import { AdminChecksPanel } from "@/components/admin/AdminChecksPanel";
+import { AdminQualityWarnings } from "@/components/admin/AdminQualityWarnings";
+import { AdminVolumeDashboard } from "@/components/admin/AdminVolumeDashboard";
+import { buildMarketQualityWarnings } from "@/lib/admin-quality";
 import { getPlatformSettings, formatFeePercent } from "@/lib/platform";
 
 export default async function AdminOverviewPage() {
   await requireAdmin();
   const supabase = await createClient();
-  const [markets, platform] = await Promise.all([
+  const [markets, platform, volume, topByPeriod] = await Promise.all([
     fetchAdminMarkets(supabase),
     getPlatformSettings(supabase),
+    fetchAdminPlatformVolume(supabase),
+    fetchAdminTopMarketsByPeriod(supabase),
   ]);
   const overview = buildAdminOverview(markets);
+  const qualityWarnings = buildMarketQualityWarnings(markets);
   const totalVolume = markets
     .filter((m) => !m.is_sandbox)
     .reduce((s, m) => s + m.stats.volume_usd, 0);
@@ -53,11 +61,13 @@ export default async function AdminOverviewPage() {
         />
         <KpiCard
           href="/admin/markets"
-          label="Оборот"
+          label="Оборот (всего)"
           value={formatAdminVolume(totalVolume)}
           sub="без тестовых"
         />
       </section>
+
+      <AdminVolumeDashboard volume={volume} topByPeriod={topByPeriod} />
 
       <AdminQuickActions />
 
@@ -78,7 +88,11 @@ export default async function AdminOverviewPage() {
           sandboxCount={overview.counts.sandbox}
           sandboxUnresolved={overview.sandboxUnresolved}
         />
-        <article className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-sm">
+        <AdminQualityWarnings items={qualityWarnings} />
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <article className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-sm lg:col-span-2">
           <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             Комиссия
           </h3>

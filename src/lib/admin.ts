@@ -322,3 +322,189 @@ export function filterAdminMarkets(
 export function formatAdminVolume(usd: number): string {
   return `$${usd.toLocaleString("ru-RU", { maximumFractionDigits: 0 })}`;
 }
+
+export type AdminVolumePeriod = "24h" | "7d" | "30d";
+
+export interface AdminPlatformVolume {
+  volume_24h: number;
+  volume_7d: number;
+  volume_30d: number;
+  trades_24h: number;
+  trades_7d: number;
+  trades_30d: number;
+}
+
+export interface AdminTopMarketRow {
+  market_id: string;
+  slug: string;
+  title: string;
+  category: string;
+  volume_usd: number;
+  trade_count: number;
+}
+
+export interface AdminResolveReminder {
+  count: number;
+  staleCount: number;
+}
+
+const VOLUME_PERIOD_DAYS: Record<AdminVolumePeriod, number> = {
+  "24h": 1,
+  "7d": 7,
+  "30d": 30,
+};
+
+const EMPTY_PLATFORM_VOLUME: AdminPlatformVolume = {
+  volume_24h: 0,
+  volume_7d: 0,
+  volume_30d: 0,
+  trades_24h: 0,
+  trades_7d: 0,
+  trades_30d: 0,
+};
+
+export function volumePeriodLabel(period: AdminVolumePeriod): string {
+  switch (period) {
+    case "24h":
+      return "24 часа";
+    case "7d":
+      return "7 дней";
+    case "30d":
+      return "30 дней";
+  }
+}
+
+export async function fetchAdminPlatformVolume(
+  supabase: SupabaseClient,
+): Promise<AdminPlatformVolume> {
+  const { data, error } = await supabase.rpc("admin_platform_volume");
+  if (error) throw error;
+
+  const row = data?.[0];
+  if (!row) return { ...EMPTY_PLATFORM_VOLUME };
+
+  return {
+    volume_24h: Number(row.volume_24h ?? 0),
+    volume_7d: Number(row.volume_7d ?? 0),
+    volume_30d: Number(row.volume_30d ?? 0),
+    trades_24h: Number(row.trades_24h ?? 0),
+    trades_7d: Number(row.trades_7d ?? 0),
+    trades_30d: Number(row.trades_30d ?? 0),
+  };
+}
+
+export async function fetchAdminTopMarkets(
+  supabase: SupabaseClient,
+  period: AdminVolumePeriod,
+  limit = 5,
+): Promise<AdminTopMarketRow[]> {
+  const { data, error } = await supabase.rpc("admin_top_markets_by_volume", {
+    p_days: VOLUME_PERIOD_DAYS[period],
+    p_limit: limit,
+  });
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    market_id: row.market_id as string,
+    slug: row.slug as string,
+    title: row.title as string,
+    category: row.category as string,
+    volume_usd: Number(row.volume_usd ?? 0),
+    trade_count: Number(row.trade_count ?? 0),
+  }));
+}
+
+export async function fetchAdminTopMarketsByPeriod(
+  supabase: SupabaseClient,
+  limit = 5,
+): Promise<Record<AdminVolumePeriod, AdminTopMarketRow[]>> {
+  const periods: AdminVolumePeriod[] = ["24h", "7d", "30d"];
+  const lists = await Promise.all(
+    periods.map((p) => fetchAdminTopMarkets(supabase, p, limit)),
+  );
+  return Object.fromEntries(
+    periods.map((p, i) => [p, lists[i]]),
+  ) as Record<AdminVolumePeriod, AdminTopMarketRow[]>;
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  created_at: string;
+  admin_id: string;
+  admin_display_name: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_slug: string | null;
+  summary: string;
+  metadata: Record<string, unknown>;
+}
+
+export function adminAuditActionLabel(action: string): string {
+  switch (action) {
+    case "market.create":
+      return "Создание рынка";
+    case "market.resolve":
+      return "Резолв";
+    case "market.close":
+      return "Закрытие торгов";
+    case "market.publish":
+      return "В каталог";
+    case "user.grant_test_shares":
+      return "Тестовые доли";
+    case "platform.set_fee_rate":
+      return "Комиссия";
+    default:
+      return action;
+  }
+}
+
+export async function fetchAdminAuditLog(
+  supabase: SupabaseClient,
+  limit = 50,
+  offset = 0,
+): Promise<AdminAuditLogEntry[]> {
+  const { data, error } = await supabase.rpc("admin_audit_log_list", {
+    p_limit: limit,
+    p_offset: offset,
+  });
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    created_at: row.created_at as string,
+    admin_id: row.admin_id as string,
+    admin_display_name: (row.admin_display_name as string | null) ?? null,
+    action: row.action as string,
+    entity_type: row.entity_type as string,
+    entity_id: (row.entity_id as string | null) ?? null,
+    entity_slug: (row.entity_slug as string | null) ?? null,
+    summary: row.summary as string,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+  }));
+}
+
+export async function fetchAdminResolveReminder(
+  supabase: SupabaseClient,
+): Promise<AdminResolveReminder> {
+  await refreshExpiredMarkets(supabase);
+
+  const { data, error } = await supabase
+    .from("markets")
+    .select("closes_at, is_sandbox")
+    .eq("status", "closed");
+
+  if (error) throw error;
+
+  const closed = (data ?? []).filter((m) => !(m.is_sandbox ?? false));
+  const now = Date.now();
+  const staleMs = 7 * 24 * 60 * 60 * 1000;
+
+  let staleCount = 0;
+  for (const m of closed) {
+    if (!m.closes_at) continue;
+    if (now - new Date(m.closes_at).getTime() > staleMs) staleCount += 1;
+  }
+
+  return { count: closed.length, staleCount };
+}

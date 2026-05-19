@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminGate } from "@/lib/admin-auth";
+import { createClient } from "@/lib/supabase/server";
+import { fetchAdminResolveReminder } from "@/lib/admin";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccessDenied } from "@/components/admin/AdminAccessDenied";
+import { AdminResolveReminderBanner } from "@/components/admin/AdminResolveReminderBanner";
 
 export default async function AdminLayout({
   children,
@@ -13,6 +16,9 @@ export default async function AdminLayout({
 
   if ("redirect" in gate) redirect(gate.redirect);
   if (!gate.isAdmin) return <AdminAccessDenied />;
+
+  const supabase = await createClient();
+  const resolveReminder = await fetchAdminResolveReminder(supabase);
 
   return (
     <section className="border-t border-zinc-900 bg-zinc-950">
@@ -30,9 +36,13 @@ export default async function AdminLayout({
               Оператор · <span className="text-zinc-700">UI v1.1</span>
             </p>
           </header>
-          <AdminNav />
+          <AdminNav resolveQueueCount={resolveReminder.count} />
         </aside>
         <article className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-8">
+          <AdminResolveReminderBanner
+            count={resolveReminder.count}
+            staleCount={resolveReminder.staleCount}
+          />
           {children}
         </article>
       </section>

@@ -9,10 +9,15 @@ const links = [
   { href: "/admin/markets/new", label: "Создать", exact: false },
   { href: "/admin/resolve", label: "Резолв", exact: false },
   { href: "/admin/ideas", label: "Идеи", exact: false },
+  { href: "/admin/audit", label: "Журнал", exact: false },
   { href: "/admin/settings", label: "Настройки", exact: false },
 ] as const;
 
-export function AdminNav() {
+export function AdminNav({
+  resolveQueueCount = 0,
+}: {
+  resolveQueueCount?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -28,13 +33,18 @@ export function AdminNav() {
           <Link
             key={href}
             href={href}
-            className={`block w-full rounded-md px-3 py-2 text-sm transition-colors ${
+            className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
               active
                 ? "bg-amber-500/15 font-medium text-amber-400"
                 : "text-zinc-400 hover:bg-zinc-800/90 hover:text-zinc-100"
             }`}
           >
-            {label}
+            <span>{label}</span>
+            {href === "/admin/resolve" && resolveQueueCount > 0 && (
+              <span className="rounded-full bg-amber-500/25 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-300">
+                {resolveQueueCount > 99 ? "99+" : resolveQueueCount}
+              </span>
+            )}
           </Link>
         );
       })}
