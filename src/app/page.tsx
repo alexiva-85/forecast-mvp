@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { getMarkets, getPopularTags } from "@/lib/markets";
+import {
+  getMarkets,
+  getPopularTags,
+  parseCatalogView,
+  PUBLIC_RESOLVED_CATALOG_DAYS,
+} from "@/lib/markets";
 import { MarketCard } from "@/components/MarketCard";
 import { MarketCatalogFilters } from "@/components/MarketCatalogFilters";
 import { HomeOnboarding } from "@/components/HomeOnboarding";
@@ -15,13 +20,20 @@ export const metadata: Metadata = {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string; tag?: string }>;
+  searchParams: Promise<{
+    category?: string;
+    q?: string;
+    tag?: string;
+    view?: string;
+  }>;
 }) {
-  const { category = "all", q = "", tag = "" } = await searchParams;
+  const { category = "all", q = "", tag = "", view: viewRaw } =
+    await searchParams;
+  const view = parseCatalogView(viewRaw);
   const supabase = await createClient();
 
   const [markets, popularTags] = await Promise.all([
-    getMarkets(supabase, { category, q, tag }),
+    getMarkets(supabase, { category, q, tag, view }),
     getPopularTags(supabase),
   ]);
 
@@ -42,6 +54,7 @@ export default async function HomePage({
       </div>
 
       <MarketCatalogFilters
+        view={view}
         category={category}
         q={q}
         tag={tag}
@@ -54,7 +67,9 @@ export default async function HomePage({
             <p>
               {hasFilters
                 ? "Ничего не найдено — измените запрос или сбросьте фильтры"
-                : "Рынки не найдены"}
+                : view === "resolved"
+                  ? `Нет завершённых рынков за последние ${PUBLIC_RESOLVED_CATALOG_DAYS} дней`
+                  : "Сейчас нет открытых рынков"}
             </p>
           </div>
         ) : (

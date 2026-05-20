@@ -1,28 +1,47 @@
 import Link from "next/link";
+import type { CatalogView } from "@/lib/markets";
+import {
+  catalogViewLabel,
+  PUBLIC_RESOLVED_CATALOG_DAYS,
+} from "@/lib/markets";
 
 export function MarketCatalogFilters({
+  view,
   category,
   q,
   tag,
   popularTags,
 }: {
+  view: CatalogView;
   category: string;
   q: string;
   tag: string;
   popularTags: string[];
 }) {
-  const tabs = [
+  const categoryTabs = [
     { id: "all", label: "Все" },
     { id: "sport", label: "Спорт" },
     { id: "crypto", label: "Крипто" },
   ];
 
-  function hrefFor(next: { category?: string; q?: string; tag?: string }) {
+  const viewTabs: { id: CatalogView; label: string }[] = [
+    { id: "active", label: catalogViewLabel("active") },
+    { id: "resolved", label: catalogViewLabel("resolved") },
+  ];
+
+  function hrefFor(next: {
+    view?: CatalogView;
+    category?: string;
+    q?: string;
+    tag?: string;
+  }) {
     const params = new URLSearchParams();
+    const v = next.view ?? view;
     const c = next.category ?? category;
     const query = next.q ?? q;
     const t = next.tag ?? tag;
 
+    if (v !== "active") params.set("view", v);
     if (c && c !== "all") params.set("category", c);
     if (query) params.set("q", query);
     if (t) params.set("tag", t);
@@ -34,7 +53,30 @@ export function MarketCatalogFilters({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        {tabs.map((tab) => (
+        {viewTabs.map((tab) => (
+          <Link
+            key={tab.id}
+            href={hrefFor({ view: tab.id, tag: "" })}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              view === tab.id
+                ? "bg-emerald-600 text-white"
+                : "bg-zinc-900 text-zinc-400 hover:text-white"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
+      {view === "resolved" && (
+        <p className="text-xs text-zinc-500">
+          Исход зафиксирован за последние {PUBLIC_RESOLVED_CATALOG_DAYS} дней.
+          Старые рынки доступны по прямой ссылке.
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {categoryTabs.map((tab) => (
           <Link
             key={tab.id}
             href={hrefFor({ category: tab.id, tag: "" })}
@@ -50,6 +92,7 @@ export function MarketCatalogFilters({
       </div>
 
       <form method="get" className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        {view !== "active" && <input type="hidden" name="view" value={view} />}
         {category !== "all" && (
           <input type="hidden" name="category" value={category} />
         )}

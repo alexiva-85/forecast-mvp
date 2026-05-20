@@ -10,10 +10,25 @@ export async function refreshExpiredMarkets(supabase: SupabaseClient) {
   await supabase.rpc("close_expired_markets");
 }
 
+/** Вкладка каталога на главной: активные (open) или недавно завершённые. */
+export type CatalogView = "active" | "resolved";
+
+/** Завершённые старше этого срока не показываются в каталоге (как A6 в админке). */
+export const PUBLIC_RESOLVED_CATALOG_DAYS = 30;
+
+export function parseCatalogView(raw?: string): CatalogView {
+  return raw === "resolved" ? "resolved" : "active";
+}
+
+export function catalogViewLabel(view: CatalogView): string {
+  return view === "resolved" ? "Завершённые" : "Торгуются";
+}
+
 export type MarketListFilters = {
   category?: string;
   q?: string;
   tag?: string;
+  view?: CatalogView;
 };
 
 function escapeIlike(value: string): string {
@@ -27,7 +42,7 @@ export async function getPopularTags(
     .from("markets")
     .select("tags")
     .eq("is_sandbox", false)
-    .neq("status", "draft");
+    .eq("status", "open");
   const counts = new Map<string, number>();
 
   for (const row of data ?? []) {
@@ -48,14 +63,24 @@ export async function getMarkets(
 ): Promise<MarketWithPrice[]> {
   await refreshExpiredMarkets(supabase);
 
-  const { category = "all", q, tag } = filters;
+  const { category = "all", q, tag, view = "active" } = filters;
 
   let query = supabase
     .from("markets")
     .select("*")
-    .eq("is_sandbox", false)
-    .neq("status", "draft")
-    .order("created_at", { ascending: true });
+    .eq("is_sandbox", false);
+
+  if (view === "resolved") {
+    const cutoff = new Date(
+      Date.now() - PUBLIC_RESOLVED_CATALOG_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    query = query
+      .eq("status", "resolved")
+      .gte("resolved_at", cutoff)
+      .order("resolved_at", { ascending: false });
+  } else {
+    query = query.eq("status", "open").order("created_at", { ascending: false });
+  }
 
   if (category && category !== "all") {
     query = query.eq("category", category);
