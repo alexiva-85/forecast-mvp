@@ -9,6 +9,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
+import ws from "ws";
 import {
   buildQuoteLadder,
   inferMidFromOrders,
@@ -17,6 +18,12 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "../..");
+
+/** Node 20 needs explicit ws transport (see tests/helpers/clients.ts). */
+const supabaseClientOptions = {
+  auth: { autoRefreshToken: false, persistSession: false },
+  realtime: { transport: ws },
+};
 
 function loadEnvLocal() {
   const path = join(root, ".env.local");
@@ -45,24 +52,52 @@ function envNum(name, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+/** Seed slugs from supabase/seed.sql — default target for mm:seed */
+const DEFAULT_MM_SLUGS = [
+  "btc-150k-2026",
+  "real-madrid-ucl-2026",
+  "russia-world-cup-2026",
+];
+
+const TEST_SLUG_PREFIXES = ["draft-market-", "sandbox-draft-"];
+
 function parseSlugList() {
   const raw = process.env.MM_MARKET_SLUGS?.trim();
-  if (!raw) return null;
-  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (raw === "*" || process.env.MM_INCLUDE_ALL_OPEN === "1") {
+    return null;
+  }
+  if (raw) {
+    return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return DEFAULT_MM_SLUGS;
+}
+
+function filterMarkets(markets) {
+  if (process.env.MM_INCLUDE_ALL_OPEN === "1") {
+    return markets.filter(
+      (m) => !TEST_SLUG_PREFIXES.some((p) => m.slug.startsWith(p)),
+    );
+  }
+  return markets;
 }
 
 async function ensureMmUser(admin, anon) {
   const email =
     process.env.MM_BOT_EMAIL?.trim() || "mm-bot@forecast.local";
-  const password = process.env.MM_BOT_PASSWORD;
+  const password = process.env.MM_BOT_PASSWORD?.trim();
   if (!password) {
+    const envPath = join(root, ".env.local");
     throw new Error(
-      "Set MM_BOT_PASSWORD in .env.local (one-time; bot signs in with this password)",
+      `MM_BOT_PASSWORD is missing.\n` +
+        `  • Add to ${envPath} (see .env.example, block E7), or\n` +
+        `  • Run once: MM_BOT_PASSWORD='your-secret' npm run mm:seed\n` +
+        `Generate: openssl rand -base64 24`,
     );
   }
 
-  const { data: list } = await admin.auth.admin.listUsers();
-  let user = list.users.find(
+  const { data: list, error: listErr } = await admin.auth.admin.listUsers();
+  if (listErr) throw listErr;
+  let user = list?.users?.find(
     (u) => u.email?.toLowerCase() === email.toLowerCase(),
   );
 
@@ -85,19 +120,21 @@ async function ensureMmUser(admin, anon) {
     .eq("id", user.id);
   if (profErr) throw profErr;
 
-  const { data: session, error: signErr } = await anon.auth.signInWithPassword({
+  const { data: authData, error: signErr } = await anon.auth.signInWithPassword({
     email,
     password,
   });
-  if (signErr || !session.session) throw signErr ?? new Error("MM sign-in failed");
+  if (signErr || !authData?.session) {
+    throw signErr ?? new Error("MM sign-in failed");
+  }
 
   const mm = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
-      auth: { autoRefreshToken: false, persistSession: false },
+      ...supabaseClientOptions,
       global: {
-        headers: { Authorization: `Bearer ${session.session.access_token}` },
+        headers: { Authorization: `Bearer ${authData.session.access_token}` },
       },
     },
   );
@@ -240,12 +277,8 @@ async function main() {
     );
   }
 
-  const admin = createClient(url, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const anon = createClient(url, anonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  const admin = createClient(url, serviceKey, supabaseClientOptions);
+  const anon = createClient(url, anonKey, supabaseClientOptions);
 
   const cfg = {
     spread: envNum("MM_SPREAD", 0.02),
@@ -259,13 +292,26 @@ async function main() {
   console.log(`MM bot: ${email} (${userId}) dryRun=${dryRun}`);
 
   const slugs = parseSlugList();
-  const markets = await listTargetMarkets(admin, slugs);
+  const markets = filterMarkets(await listTargetMarkets(admin, slugs));
   if (!markets.length) {
-    console.log("No open production markets to quote.");
+    console.log(
+      slugs
+        ? "No matching open markets (check MM_MARKET_SLUGS and status=open)."
+        : "No open production markets to quote.",
+    );
     return;
   }
 
-  console.log(`Markets: ${markets.map((m) => m.slug).join(", ")}`);
+  const useDefaultSlugs =
+    !process.env.MM_MARKET_SLUGS?.trim() &&
+    process.env.MM_INCLUDE_ALL_OPEN !== "1";
+  const targetHint =
+    slugs === null
+      ? " (all open non-sandbox, test slugs excluded)"
+      : useDefaultSlugs
+        ? " (default seed slugs)"
+        : "";
+  console.log(`Markets${targetHint}: ${markets.map((m) => m.slug).join(", ")}`);
   for (const market of markets) {
     await requoteMarket(mm, admin, market, userId, cfg, dryRun);
   }
@@ -273,6 +319,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(err.message || err);
+  console.error(err?.message ?? err);
   process.exit(1);
 });
