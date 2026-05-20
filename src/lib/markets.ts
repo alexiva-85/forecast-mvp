@@ -149,3 +149,23 @@ export function formatClosesAt(closesAt: string | null): string | null {
 export function isMarketTradeable(market: Pick<Market, "status">): boolean {
   return market.status === "open";
 }
+
+export type PublicMarketSitemapEntry = {
+  slug: string;
+  updated_at: string;
+};
+
+/** Публичные рынки для sitemap (без draft и sandbox). */
+export async function getPublicMarketSitemapEntries(
+  supabase: SupabaseClient,
+): Promise<PublicMarketSitemapEntry[]> {
+  const { data, error } = await supabase
+    .from("markets")
+    .select("slug, updated_at")
+    .eq("is_sandbox", false)
+    .neq("status", "draft")
+    .order("updated_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as PublicMarketSitemapEntry[];
+}

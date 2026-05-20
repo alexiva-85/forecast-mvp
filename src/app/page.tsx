@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getMarkets, getPopularTags } from "@/lib/markets";
 import { MarketCard } from "@/components/MarketCard";
 import { MarketCatalogFilters } from "@/components/MarketCatalogFilters";
+import { HomeOnboarding } from "@/components/HomeOnboarding";
+
+export const metadata: Metadata = {
+  title: "Каталог рынков",
+  description:
+    "Откройте прогнозные рынки по спорту и крипто. Тестовый баланс $10 000 при регистрации.",
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage({
   searchParams,
@@ -20,12 +29,15 @@ export default async function HomePage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-8">
+      <HomeOnboarding />
+
+      <div id="markets" className="mb-8 scroll-mt-6">
         <h1 className="text-2xl font-semibold tracking-tight text-white">
           Прогнозные рынки
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Покупайте доли «Да» или «Нет». Тестовый баланс $10&nbsp;000 при регистрации.
+          Покупайте доли исходов по цене от 1¢ до 99¢ — это оценка вероятности
+          рынком.
         </p>
       </div>
 

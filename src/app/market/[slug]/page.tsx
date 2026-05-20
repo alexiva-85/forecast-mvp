@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -16,6 +17,47 @@ import Link from "next/link";
 import { getPlatformSettings } from "@/lib/platform";
 import { buildOutcomeLabelMap } from "@/lib/outcomes";
 import { MarketReportButton } from "@/components/MarketReportButton";
+import {
+  isMarketIndexable,
+  marketMetaDescription,
+  marketOgSubtitle,
+} from "@/lib/seo";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const market = await getMarketBySlug(supabase, slug);
+
+  if (!market) {
+    return { title: "Рынок не найден" };
+  }
+
+  const description = marketMetaDescription(market);
+  const ogSubtitle = marketOgSubtitle(market);
+  const indexable = isMarketIndexable(market);
+
+  return {
+    title: market.title,
+    description,
+    alternates: { canonical: `/market/${slug}` },
+    robots: indexable ? undefined : { index: false, follow: false },
+    openGraph: {
+      title: market.title,
+      description: ogSubtitle,
+      url: `/market/${slug}`,
+      type: "article",
+    },
+    twitter: {
+      card: "summary",
+      title: market.title,
+      description: ogSubtitle,
+    },
+  };
+}
 
 export default async function MarketPage({
   params,

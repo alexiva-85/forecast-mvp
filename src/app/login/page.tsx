@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { LoginForms } from "@/components/LoginForms";
+
+export const metadata: Metadata = {
+  title: "Вход",
+  description:
+    "Войдите в Forecast: Google, GitHub, magic link или пароль. Тестовый баланс $10 000.",
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage({
   searchParams,

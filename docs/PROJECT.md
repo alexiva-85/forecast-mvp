@@ -133,7 +133,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | F1 | Trading fee в контракте/БД | `planned` |
 | F2 | Реферальная программа | `planned` |
 | F3 | Лидерборды, объём | `planned` |
-| F4 | SEO, лендинг, онбординг RU | `planned` |
+| F4 | SEO, лендинг, онбординг RU | `done` |
 
 ### Блок G — Качество и безопасность
 

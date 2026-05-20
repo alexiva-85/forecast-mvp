@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/Header";
+import { getSiteOrigin } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Forecast MVP — прогнозные рынки",
-  description: "Тестовая платформа прогнозных рынков (спорт и крипто)",
+  metadataBase: new URL(getSiteOrigin()),
+  title: {
+    default: "Forecast — прогнозные рынки",
+    template: "%s · Forecast",
+  },
+  description:
+    "Русскоязычная прогнозная биржа: покупайте доли исходов по вероятности рынка. MVP на тестовых деньгах — свой стакан и резолв.",
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Forecast",
+    title: "Forecast — прогнозные рынки",
+    description:
+      "Торгуйте долями «Да» и «Нет» на реальных событиях. Тестовый баланс при регистрации.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Forecast — прогнозные рынки",
+    description:
+      "Прогнозная биржа на тестовых деньгах. Свой стакан, без Polymarket CLOB.",
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
