@@ -120,7 +120,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 |----|--------|--------|
 | E1 | Виртуальный USD (тест) | `done` |
 | E2 | Юридическая модель (РФ / офшор) | `blocked` (вне кода) |
-| E3 | Депозит / вывод (фиат или крипто) | `planned` |
+| E3 | Депозит / вывод (фиат или крипто) | `done` (UI + `withdrawal_requests` без PSP; реальные платежи после E2) |
 | E4 | Эскроу / ledger с аудитом | `planned` |
 | E5 | On-chain: deploy CTF + Exchange (testnet) | `planned` |
 | E6 | Oracle / резолв (UMA adapter или свой) | `planned` |

@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 
 const ACCOUNT_PATHS = [
   "/portfolio",
+  "/portfolio/deposit",
+  "/portfolio/withdraw",
   "/portfolio/positions",
   "/portfolio/orders",
   "/portfolio/activity",

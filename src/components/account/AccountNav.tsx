@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/portfolio", label: "Обзор", exact: true },
+  { href: "/portfolio/deposit", label: "Пополнить", exact: true },
+  { href: "/portfolio/withdraw", label: "Вывести", exact: true },
   { href: "/portfolio/positions", label: "Позиции", exact: false },
   { href: "/portfolio/orders", label: "Заявки", exact: false },
   { href: "/portfolio/activity", label: "История", exact: false },

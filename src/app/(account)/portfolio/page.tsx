@@ -54,7 +54,15 @@ export default async function PortfolioOverviewPage() {
         </p>
       </header>
 
-      <AccountBalanceCard balance={Number(profile.balance)} />
+      <AccountBalanceCard
+        balance={Number(profile.balance)}
+        showActions
+      />
+
+      <p className="text-xs leading-relaxed text-zinc-600">
+        Средства на счёте — тестовые. Реальное пополнение и выплаты после
+        юридической модели (E2) и платёжного провайдера.
+      </p>
 
       <section className="grid gap-3 sm:grid-cols-2">
         <Link

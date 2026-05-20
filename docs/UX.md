@@ -36,7 +36,9 @@
 
 Меню кабинета — справа на desktop; на mobile — горизонтальные вкладки сверху контента.
 
-Маршруты: `/portfolio`, `/portfolio/positions`, `/portfolio/orders`, `/portfolio/activity`, `/profile`.
+Маршруты: `/portfolio`, `/portfolio/deposit`, `/portfolio/withdraw`, `/portfolio/positions`, `/portfolio/orders`, `/portfolio/activity`, `/profile`.
+
+**Пополнение / вывод (E3):** явный дисклеймер «тестовые деньги»; пополнение — только описание текущего режима; вывод — форма заявки + список со статусом «На рассмотрении» (баланс не списывается до PSP).
 
 ---
 
