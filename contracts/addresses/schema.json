@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ForecastOnchainAddresses",
+  "type": "object",
+  "required": ["network", "chainId", "source", "contracts"],
+  "properties": {
+    "network": { "type": "string" },
+    "chainId": { "type": "integer", "enum": [80002, 137] },
+    "source": { "type": "string", "enum": ["polymarket", "forecast"] },
+    "rpcUrl": { "type": "string", "format": "uri" },
+    "contracts": {
+      "type": "object",
+      "required": ["ctfExchange", "conditionalTokens", "collateralToken"],
+      "properties": {
+        "ctfExchange": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{40}$" },
+        "conditionalTokens": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{40}$" },
+        "collateralToken": { "type": ["string", "null"], "pattern": "^0x[a-fA-F0-9]{40}$" }
+      }
+    }
+  }
+}

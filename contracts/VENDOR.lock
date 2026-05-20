@@ -1,0 +1,14 @@
+# Forecast pin for Polymarket CTF Exchange V2 (E5)
+# License: MIT — https://github.com/Polymarket/ctf-exchange-v2/blob/main/LICENSE.md
+#
+# Research baseline: docs/research/2026-05-20.md ("v1.0.6", 2026-05-08).
+# Upstream has no git tag/releases on GitHub; pin by commit SHA below.
+# Sync: npm run onchain:vendor
+
+repo=https://github.com/Polymarket/ctf-exchange-v2.git
+commit=ccc0596074f4dfd62c944fbca4de252893b82b4b
+commit_short=ccc0596
+commit_message=docs: security section (#98)
+foundry_version=1.7.1
+eip712_domain_version=2
+eip712_domain_name=Polymarket CTF Exchange

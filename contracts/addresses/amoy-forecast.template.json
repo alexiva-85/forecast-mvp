@@ -1,0 +1,25 @@
+{
+  "$schema": "./schema.json",
+  "network": "polygon-amoy",
+  "chainId": 80002,
+  "source": "forecast",
+  "description": "Forecast-owned Exchange deploy. Copy to amoy-forecast.json after deploy (file is gitignored).",
+  "rpcUrl": "https://rpc-amoy.polygon.technology",
+  "deployedAt": null,
+  "deployer": null,
+  "contracts": {
+    "ctfExchange": null,
+    "negRiskCtfExchange": null,
+    "conditionalTokens": "0x69308FB512518e39F9b16112fA8d994F4e2Bf8bB",
+    "collateralToken": "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB",
+    "ctfCollateralAdapter": "0xADa100874d00e3331D00F2007a9c336a65009718",
+    "proxyFactory": "0xEcA1c266193F03d28517a500007738adfb7754d8",
+    "safeFactory": "0xaacFeEa03eb1561C4e67d661e40682Bd20E3541b",
+    "feeReceiver": null
+  },
+  "eip712": {
+    "exchangeDomainVersion": "2",
+    "exchangeVerifyingContract": null
+  },
+  "notes": "Reuse Polymarket Amoy CTF/collateral/adapters; deploy only CTFExchangeV2 with Forecast admin/operator keys."
+}

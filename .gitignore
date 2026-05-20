@@ -33,6 +33,13 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# on-chain vendor clone & deploy artifacts (E5)
+/contracts/vendor/
+/contracts/addresses/amoy-forecast.json
+/contracts/**/broadcast/
+/contracts/**/cache/
+/contracts/**/out/
+
 # vercel
 .vercel
 

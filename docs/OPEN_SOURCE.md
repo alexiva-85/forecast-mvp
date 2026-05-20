@@ -23,7 +23,7 @@
 | Репозиторий | Назначение для Forecast | Когда подключать | Лицензия |
 |-------------|----------------------|------------------|----------|
 | [Polymarket/ctf-exchange](https://github.com/Polymarket/ctf-exchange) | Биржевой контракт v1, hybrid CLOB settlement | E5 testnet | MIT |
-| [Polymarket/ctf-exchange-v2](https://github.com/Polymarket/ctf-exchange-v2) | V2: fee на матче, builder, pUSD | E5 — pin **v1.0.6** (2026-05-08) | MIT |
+| [Polymarket/ctf-exchange-v2](https://github.com/Polymarket/ctf-exchange-v2) | V2: fee на матче, builder, pUSD | E5 — pin commit **`ccc0596`** ([VENDOR.lock](../contracts/VENDOR.lock); baseline v1.0.6 per research) | MIT |
 | [gnosis/conditional-tokens-contracts](https://github.com/gnosis/conditional-tokens-contracts) | ERC1155 доли исходов | E5 | LGPL-3.0 |
 | [Polymarket/uma-ctf-adapter](https://github.com/Polymarket/uma-ctf-adapter) | Резолв через UMA | E6 | MIT |
 | [Polymarket/uma-ctf-adapter-sdk](https://github.com/Polymarket/uma-ctf-adapter-sdk) | Создание рынков on-chain | C2 + E6 | MIT |
@@ -112,4 +112,4 @@
 
 ---
 
-*Версия реестра: 2026-05-20 (research pass, CLOB V2)*
+*Версия реестра: 2026-05-20 (E5 vendor pin + Amoy reference addresses)*

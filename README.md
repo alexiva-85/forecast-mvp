@@ -185,6 +185,8 @@ npm run db:migrate    # link + push + verify
 | `npm run db:verify` | Проверить RPC и колонки на удалённой БД |
 | `npm run db:repair-manual` | Если 001/002 применяли вручную в SQL Editor |
 | `npm test` | Интеграционные тесты RPC и RLS (`supabase login` или `SUPABASE_SERVICE_ROLE_KEY` в `.env.local`) |
+| `npm run onchain:vendor` | Синхронизация `ctf-exchange-v2` (E5, нужен Foundry) |
+| `npm run onchain:smoke` | Smoke Amoy: bytecode + `getCtf()` (public RPC) |
 
 Миграции применяются **только локально** (`npm run db:migrate`). Секреты из `.env.local` в git не попадают (файл в `.gitignore`).
 
