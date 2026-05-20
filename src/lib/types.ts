@@ -64,6 +64,7 @@ export interface Profile {
   display_name: string | null;
   balance: number;
   is_admin: boolean;
+  is_mm_bot?: boolean;
 }
 
 export interface Order {

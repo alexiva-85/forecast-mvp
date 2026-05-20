@@ -37,7 +37,7 @@
 | [Polymarket/clob-client](https://github.com/Polymarket/clob-client) | CLOB V1 (**deprecated** на prod) | Не использовать в новом коде | v5.8.2 legacy |
 | [Polymarket/rs-clob-client-v2](https://github.com/Polymarket/rs-clob-client-v2) | Rust CLOB | То же |
 | [Polymarket/builder-relayer-client](https://github.com/Polymarket/builder-relayer-client) | Gasless on-chain | Только при интеграции с **их** CLOB как builder |
-| [Polymarket/poly-market-maker](https://github.com/Polymarket/poly-market-maker) | MM-стратегии | Адаптировать под **наш** API/БД (E7) |
+| [Polymarket/poly-market-maker](https://github.com/Polymarket/poly-market-maker) | MM-стратегии | E7: идеи в `scripts/mm/` + `npm run mm:seed`, не зависимость |
 
 ### 2.3. Примеры интеграций (UI/auth)
 

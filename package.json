@@ -16,7 +16,8 @@
     "onchain:vendor": "bash scripts/onchain/vendor-sync.sh",
     "onchain:deploy:exchange": "bash scripts/onchain/deploy-exchange.sh",
     "onchain:smoke": "node scripts/onchain/smoke-amoy.mjs",
-    "onchain:uma:init": "node scripts/onchain/init-uma-condition.mjs"
+    "onchain:uma:init": "node scripts/onchain/init-uma-condition.mjs",
+    "mm:seed": "node scripts/mm/seed-liquidity.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.53.1",
