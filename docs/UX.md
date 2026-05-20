@@ -36,9 +36,11 @@
 
 Меню кабинета — справа на desktop; на mobile — горизонтальные вкладки сверху контента.
 
-Маршруты: `/portfolio`, `/portfolio/deposit`, `/portfolio/withdraw`, `/portfolio/positions`, `/portfolio/orders`, `/portfolio/activity`, `/profile`.
+Маршруты: `/portfolio`, `/portfolio/deposit`, `/portfolio/withdraw`, `/portfolio/referral`, `/portfolio/positions`, `/portfolio/orders`, `/portfolio/activity`, `/profile`.
 
-**Пополнение / вывод (E3):** явный дисклеймер «тестовые деньги»; пополнение — только описание текущего режима; вывод — форма заявки + список со статусом «На рассмотрении» (баланс не списывается до PSP).
+**Рефералы (F2):** `/portfolio/referral` — код и ссылка `?ref=`, бонус $500 обоим (тестовые деньги), ввод кода в течение 7 дней после регистрации.
+
+**Пополнение / вывод (E3–E4):** дисклеймер «тестовые деньги»; пополнение — описание режима; вывод — заявка резервирует сумму на счёте (E4 ledger), список со статусом, отмена pending; оператор — `/admin/withdrawals`.
 
 ---
 

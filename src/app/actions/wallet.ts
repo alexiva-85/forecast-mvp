@@ -46,8 +46,49 @@ export async function submitWithdrawalRequest(input: {
 
     revalidatePath("/portfolio/withdraw");
     revalidatePath("/portfolio");
+    revalidatePath("/portfolio/activity");
     return { success: true as const };
   });
+}
+
+export async function cancelWithdrawalRequest(requestId: string) {
+  return withSentryServerAction("cancelWithdrawalRequest", async () => {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: "Войдите в аккаунт" };
+    }
+
+    const { error } = await supabase.rpc("cancel_my_withdrawal_request", {
+      p_request_id: requestId,
+    });
+
+    if (error) {
+      return { error: mapCancelWithdrawalError(error.message) };
+    }
+
+    revalidatePath("/portfolio/withdraw");
+    revalidatePath("/portfolio");
+    revalidatePath("/portfolio/activity");
+    return { success: true as const };
+  });
+}
+
+function mapCancelWithdrawalError(message: string): string {
+  if (message.includes("Not authenticated")) {
+    return "Войдите в аккаунт";
+  }
+  if (message.includes("Withdrawal cannot be cancelled")) {
+    return "Эту заявку нельзя отменить";
+  }
+  if (message.includes("Withdrawal not found")) {
+    return "Заявка не найдена";
+  }
+  reportUnexpectedRpcError("wallet", message);
+  return "Не удалось отменить заявку";
 }
 
 function mapWithdrawalError(message: string): string {

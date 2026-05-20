@@ -5,7 +5,13 @@ export type ActivityEventType =
   | "trade_buy"
   | "trade_sell"
   | "order_cancelled"
-  | "redeem";
+  | "redeem"
+  | "withdrawal_hold"
+  | "withdrawal_release"
+  | "withdrawal_complete"
+  | "deposit"
+  | "referral_bonus"
+  | "wallet_adjust";
 
 export type ActivityBadgeVariant = "buy" | "sell" | "payout" | "cancel";
 
@@ -36,6 +42,12 @@ const TYPE_LABELS: Record<ActivityEventType, string> = {
   trade_sell: "Продажа",
   order_cancelled: "Отмена",
   redeem: "Выплата",
+  withdrawal_hold: "Резерв под вывод",
+  withdrawal_release: "Возврат с резерва",
+  withdrawal_complete: "Вывод выполнен",
+  deposit: "Пополнение",
+  referral_bonus: "Реферальный бонус",
+  wallet_adjust: "Корректировка баланса",
 };
 
 const BADGE_VARIANT: Record<ActivityEventType, ActivityBadgeVariant> = {
@@ -43,6 +55,12 @@ const BADGE_VARIANT: Record<ActivityEventType, ActivityBadgeVariant> = {
   trade_sell: "sell",
   order_cancelled: "cancel",
   redeem: "payout",
+  withdrawal_hold: "sell",
+  withdrawal_release: "payout",
+  withdrawal_complete: "sell",
+  deposit: "payout",
+  referral_bonus: "payout",
+  wallet_adjust: "cancel",
 };
 
 export function activityTypeLabel(type: ActivityEventType): string {
@@ -127,6 +145,18 @@ export function describeActivity(
         marketTitle: row.market_title,
       };
     }
+    case "withdrawal_hold":
+    case "withdrawal_release":
+    case "withdrawal_complete":
+    case "deposit":
+    case "wallet_adjust":
+      return {
+        actionLine: badgeLabel,
+        badgeVariant,
+        termsLine: row.market_title ?? null,
+        marketSlug: null,
+        marketTitle: null,
+      };
     default:
       return {
         actionLine: badgeLabel,

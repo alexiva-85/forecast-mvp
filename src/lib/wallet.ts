@@ -17,6 +17,12 @@ export type WithdrawalRequestRow = {
   reviewed_at: string | null;
 };
 
+export type WalletSummary = {
+  balance: number;
+  held: number;
+  available: number;
+};
+
 const METHOD_LABELS: Record<WithdrawalMethod, string> = {
   bank: "Банковский перевод",
   card: "Карта",
@@ -44,6 +50,17 @@ export function formatUsdAmount(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+export function parseWalletSummary(data: unknown): WalletSummary | null {
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof row !== "object") return null;
+  const r = row as Record<string, unknown>;
+  return {
+    balance: Number(r.balance),
+    held: Number(r.held),
+    available: Number(r.available),
+  };
 }
 
 export function parseWithdrawalRows(

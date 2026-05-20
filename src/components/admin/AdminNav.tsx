@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/ideas", label: "Идеи", exact: false },
   { href: "/admin/reports", label: "Жалобы", exact: false },
   { href: "/admin/users", label: "Пользователи", exact: false },
+  { href: "/admin/withdrawals", label: "Выводы", exact: false },
   { href: "/admin/trading", label: "Сделки", exact: false },
   { href: "/admin/audit", label: "Журнал", exact: false },
   { href: "/admin/settings", label: "Настройки", exact: false },

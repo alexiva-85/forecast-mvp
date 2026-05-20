@@ -32,6 +32,12 @@ describe("E3 — withdrawal requests", () => {
   });
 
   it("submits pending withdrawal and lists it", async () => {
+    const { data: before } = await admin
+      .from("profiles")
+      .select("balance")
+      .eq("id", userId)
+      .single();
+
     const { data: requestId, error } = await user.rpc(
       "submit_withdrawal_request",
       {
@@ -42,6 +48,13 @@ describe("E3 — withdrawal requests", () => {
     );
     expect(error).toBeNull();
     expect(requestId).toBeTruthy();
+
+    const { data: after } = await admin
+      .from("profiles")
+      .select("balance")
+      .eq("id", userId)
+      .single();
+    expect(Number(after?.balance)).toBe(Number(before?.balance) - 100);
 
     const { data: list, error: listErr } = await user.rpc(
       "list_my_withdrawal_requests",

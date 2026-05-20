@@ -368,6 +368,29 @@ export async function setTradeFeeRate(ratePercent: number) {
   });
 }
 
+export async function reviewWithdrawalRequest(input: {
+  requestId: string;
+  status: "approved" | "rejected" | "completed" | "cancelled";
+  adminNote: string;
+}) {
+  return withSentryServerAction("reviewWithdrawalRequest", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_review_withdrawal", {
+      p_request_id: input.requestId,
+      p_status: input.status,
+      p_admin_note: input.adminNote.trim() || null,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/admin/withdrawals");
+    revalidatePath("/admin/audit");
+    return { success: true };
+  });
+}
+
 export async function updateContentReport(input: {
   reportId: string;
   status: "reviewed" | "dismissed" | "action_taken";

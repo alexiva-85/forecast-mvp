@@ -4,6 +4,7 @@ import {
   buildOutcomeLabelsBySlug,
   collectMarketIdsFromAccountData,
   fetchAccountProfile,
+  fetchWalletSummary,
   fetchUserActivity,
   fetchUserOpenOrders,
   fetchUserPositions,
@@ -15,7 +16,10 @@ import { ActivityHistory } from "@/components/ActivityHistory";
 
 export default async function PortfolioOverviewPage() {
   const { supabase, user } = await requireAccountUser("/portfolio");
-  const profile = await fetchAccountProfile(supabase, user.id);
+  const [profile, wallet] = await Promise.all([
+    fetchAccountProfile(supabase, user.id),
+    fetchWalletSummary(supabase),
+  ]);
   const positions = await fetchUserPositions(supabase, user.id);
   const openOrders = await fetchUserOpenOrders(supabase, user.id);
   const recentActivity = await fetchUserActivity(supabase, 5);
@@ -55,7 +59,8 @@ export default async function PortfolioOverviewPage() {
       </header>
 
       <AccountBalanceCard
-        balance={Number(profile.balance)}
+        balance={wallet?.balance ?? Number(profile.balance)}
+        held={wallet?.held ?? 0}
         showActions
       />
 

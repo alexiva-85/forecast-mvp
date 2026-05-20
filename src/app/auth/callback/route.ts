@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { applyReferralFromCookie } from "@/app/actions/referral";
 import { createClient } from "@/lib/supabase/server";
 import { safeAuthRedirect } from "@/lib/auth-redirect";
 import { mapAuthCallbackError } from "@/lib/auth-errors";
@@ -22,6 +23,7 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      await applyReferralFromCookie();
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

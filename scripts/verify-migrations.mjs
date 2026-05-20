@@ -253,6 +253,62 @@ const checks = [
     },
   },
   {
+    name: "E4 — get_my_wallet_summary",
+    async run() {
+      const res = await rpc("get_my_wallet_summary", {});
+      return res.code === "P0001" && res.message?.includes("Not authenticated");
+    },
+  },
+  {
+    name: "E4 — admin_withdrawal_requests_list",
+    async run() {
+      const res = await rpc("admin_withdrawal_requests_list", {
+        p_status: "pending",
+        p_limit: 5,
+        p_offset: 0,
+      });
+      return (
+        res.code === "P0001" &&
+        (res.message?.includes("Admin only") ||
+          res.message?.includes("Not authenticated"))
+      );
+    },
+  },
+  {
+    name: "E4 — balance_ledger table",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/balance_ledger?select=id&limit=1`,
+        { headers: headers() },
+      );
+      return res.ok;
+    },
+  },
+  {
+    name: "F2 — apply_referral_code",
+    async run() {
+      const res = await rpc("apply_referral_code", { p_code: "TESTCODE" });
+      return res.code === "P0001" && res.message?.includes("Not authenticated");
+    },
+  },
+  {
+    name: "F2 — get_my_referral_summary",
+    async run() {
+      const res = await rpc("get_my_referral_summary", {});
+      return res.code === "P0001" && res.message?.includes("Not authenticated");
+    },
+  },
+  {
+    name: "F2 — referral_attributions table",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/referral_attributions?select=id&limit=1`,
+        { headers: headers() },
+      );
+      return res.ok;
+    },
+  },
+  {
     name: "C7 — admin_resolve closed only",
     async run() {
       const res = await rpc("admin_resolve_market", {

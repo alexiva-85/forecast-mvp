@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { estimateTradeFee } from "@/lib/platform";
 import { createServiceClient, createUserClient } from "./helpers/clients";
 
 describe("G1 — trading RPC", () => {
@@ -61,6 +62,12 @@ describe("G1 — trading RPC", () => {
     const price = 0.4;
     const size = 5;
 
+    const { data: feeRateRaw, error: feeRateErr } = await admin.rpc(
+      "get_trade_fee_rate",
+    );
+    expect(feeRateErr).toBeNull();
+    const feeRate = Number(feeRateRaw);
+
     await admin.from("positions").upsert({
       user_id: sellerId,
       market_id: marketId,
@@ -103,7 +110,7 @@ describe("G1 — trading RPC", () => {
     expect(Number(trade.fee_amount)).toBeGreaterThan(0);
 
     const notional = price * size;
-    const expectedFee = Math.round(notional * 0.01 * 10000) / 10000;
+    const expectedFee = estimateTradeFee(notional, feeRate);
     expect(Number(trade.fee_amount)).toBe(expectedFee);
 
     const balanceAfterBuy = await getBalance(buyer, buyerId);

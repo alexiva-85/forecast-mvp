@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { applyReferralFromCookie } from "@/app/actions/referral";
 import { createClient } from "@/lib/supabase/client";
 import { safeAuthRedirect } from "@/lib/auth-redirect";
 import { buildAuthCallbackUrl } from "@/lib/auth-callback-url";
@@ -81,6 +82,7 @@ export function LoginForms({
       return;
     }
 
+    await applyReferralFromCookie();
     router.push(safeAuthRedirect(nextPath));
     router.refresh();
   }
@@ -134,6 +136,7 @@ export function LoginForms({
 
     if (data.session) {
       setPending(null);
+      await applyReferralFromCookie();
       router.push(safeAuthRedirect(nextPath));
       router.refresh();
       return;
@@ -148,6 +151,7 @@ export function LoginForms({
     setPending(null);
 
     if (!signInError) {
+      await applyReferralFromCookie();
       router.push(safeAuthRedirect(nextPath));
       router.refresh();
       return;

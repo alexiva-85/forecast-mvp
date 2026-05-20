@@ -1,8 +1,15 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
+import { referralCookieOptions } from "@/lib/referral-cookie";
+import { isValidReferralCodeFormat, normalizeReferralCode } from "@/lib/referral";
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request);
+  const response = await updateSession(request);
+  const ref = request.nextUrl.searchParams.get("ref");
+  if (ref && isValidReferralCodeFormat(ref)) {
+    response.cookies.set(referralCookieOptions(normalizeReferralCode(ref)));
+  }
+  return response;
 }
 
 export const config = {

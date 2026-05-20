@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseActivityRows } from "@/lib/activity";
 import { getOutcomeLabelMapsByMarketId } from "@/lib/outcomes";
-import { parseWithdrawalRows } from "@/lib/wallet";
+import { parseWalletSummary, parseWithdrawalRows } from "@/lib/wallet";
 
 export async function fetchAccountProfile(
   supabase: SupabaseClient,
@@ -57,6 +57,12 @@ export async function fetchUserActivity(
   });
   if (error) throw error;
   return parseActivityRows(data);
+}
+
+export async function fetchWalletSummary(supabase: SupabaseClient) {
+  const { data, error } = await supabase.rpc("get_my_wallet_summary");
+  if (error) throw error;
+  return parseWalletSummary(data);
 }
 
 export async function fetchUserWithdrawalRequests(

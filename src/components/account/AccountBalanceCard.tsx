@@ -2,16 +2,28 @@ import Link from "next/link";
 
 export function AccountBalanceCard({
   balance,
+  held = 0,
   compact = false,
   showActions = false,
 }: {
   balance: number;
+  held?: number;
   compact?: boolean;
   showActions?: boolean;
 }) {
   const formatted = Number(balance).toLocaleString("ru-RU", {
     maximumFractionDigits: 2,
   });
+  const heldFormatted = Number(held).toLocaleString("ru-RU", {
+    maximumFractionDigits: 2,
+  });
+  const heldLine =
+    held > 0 ? (
+      <p className="mt-2 text-xs text-zinc-500">
+        В резерве под вывод:{" "}
+        <span className="tabular-nums text-zinc-400">${heldFormatted}</span>
+      </p>
+    ) : null;
 
   const actions = showActions ? (
     <div className="mt-4 flex flex-wrap gap-2">
@@ -36,6 +48,7 @@ export function AccountBalanceCard({
         <p className="text-2xl font-semibold tabular-nums text-emerald-400">
           ${formatted}
         </p>
+        {heldLine}
         {actions}
       </div>
     );
@@ -47,6 +60,7 @@ export function AccountBalanceCard({
       <p className="mt-1 text-3xl font-semibold tabular-nums text-emerald-400">
         ${formatted}
       </p>
+      {heldLine}
       {actions}
     </section>
   );

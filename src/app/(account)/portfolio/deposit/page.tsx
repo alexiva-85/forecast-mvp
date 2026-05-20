@@ -35,8 +35,8 @@ export default async function PortfolioDepositPage() {
             подключения PSP — без этого интеграции в MVP нет.
           </li>
           <li>
-            История пополнений и сверка с платёжным провайдером — в блоке{" "}
-            <span className="text-zinc-300">E4</span> (ledger с аудитом).
+            История пополнений и сверка с платёжным провайдером ведутся в
+            ledger (блок E4); реальные платежи — после PSP.
           </li>
         </ul>
       </section>
