@@ -1,5 +1,19 @@
-import type { MarketOutcome } from "@/lib/types";
+import type { MarketOutcome, MarketWithPrice } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+/** Цена исхода для UI — из outcome_prices, без дополнения 1−yes для «no». */
+export function displayOutcomePrice(
+  market: Pick<MarketWithPrice, "outcome_prices" | "yes_price">,
+  outcomeKey: string,
+): number {
+  const fromMap = market.outcome_prices[outcomeKey];
+  if (fromMap != null && Number.isFinite(fromMap)) return fromMap;
+  if (outcomeKey === "yes") return market.yes_price;
+  if (outcomeKey === "no") {
+    return Math.round((1 - market.yes_price) * 100) / 100;
+  }
+  return 0.5;
+}
 
 export function formatOutcomeLabel(
   outcomeKey: string,

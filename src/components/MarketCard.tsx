@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { MarketWithPrice } from "@/lib/types";
 import { MarketStatusChip } from "@/components/MarketStatusChip";
 import { categoryLabel, formatPrice, formatClosesAt } from "@/lib/markets";
+import { displayOutcomePrice } from "@/lib/outcomes";
 import {
   getMultiOutcomeAccent,
   MULTI_OUTCOME_CARD_PREVIEW,
@@ -16,7 +17,6 @@ export function MarketCard({
 }) {
   const isMulti =
     market.outcome_mode === "multi" || (market.outcomes?.length ?? 0) > 2;
-  const noPrice = Math.round((1 - market.yes_price) * 100) / 100;
   const sortedOutcomes = [...(market.outcomes ?? [])].sort(
     (a, b) => a.sort_order - b.sort_order,
   );
@@ -66,13 +66,13 @@ export function MarketCard({
           <div className="flex-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-center">
             <p className="text-xs text-emerald-500/80">Да</p>
             <p className="text-lg font-semibold text-emerald-400">
-              {formatPrice(market.yes_price)}
+              {formatPrice(displayOutcomePrice(market, "yes"))}
             </p>
           </div>
           <div className="flex-1 rounded-lg bg-rose-500/10 px-3 py-2 text-center">
             <p className="text-xs text-rose-500/80">Нет</p>
             <p className="text-lg font-semibold text-rose-400">
-              {formatPrice(noPrice)}
+              {formatPrice(displayOutcomePrice(market, "no"))}
             </p>
           </div>
         </div>

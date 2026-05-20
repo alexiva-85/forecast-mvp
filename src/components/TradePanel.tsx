@@ -8,7 +8,7 @@ import {
 } from "@/app/actions/trading";
 import type { MarketOrderResult } from "@/app/actions/trading";
 import { ResolutionAudit } from "@/components/ResolutionAudit";
-import { formatOutcomeLabel } from "@/lib/outcomes";
+import { displayOutcomePrice, formatOutcomeLabel } from "@/lib/outcomes";
 import type { MarketWithPrice } from "@/lib/types";
 import { formatPrice } from "@/lib/markets";
 import {
@@ -38,9 +38,7 @@ export function TradePanel({
   const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [orderMode, setOrderMode] = useState<OrderMode>("limit");
   const [marketTif, setMarketTif] = useState<MarketTif>("ioc");
-  const outcomePrice = (key: string) =>
-    market.outcome_prices[key] ??
-    (key === "yes" ? market.yes_price : key === "no" ? 1 - market.yes_price : 0.5);
+  const outcomePrice = (key: string) => displayOutcomePrice(market, key);
 
   const [price, setPrice] = useState(outcomePrice(defaultOutcome));
   const [size, setSize] = useState(10);
