@@ -37,17 +37,19 @@ export function HomeOnboarding() {
 
       <ol className="mt-8 grid gap-6 sm:grid-cols-3">
         {STEPS.map((step, index) => (
-          <li key={step.title} className="relative pl-10 sm:pl-0 sm:pt-10">
+          <li key={step.title} className="flex gap-3">
             <span
-              className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-semibold text-emerald-400"
+              className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-semibold text-emerald-400"
               aria-hidden
             >
               {index + 1}
             </span>
-            <h3 className="text-sm font-medium text-white">{step.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-              {step.body}
-            </p>
+            <div className="min-w-0">
+              <h3 className="text-sm font-medium text-white">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                {step.body}
+              </p>
+            </div>
           </li>
         ))}
       </ol>
