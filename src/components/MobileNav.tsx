@@ -114,13 +114,10 @@ function MobileNavDrawer({
       />
       <nav
         id="mobile-nav-panel"
-        className="fixed inset-y-0 right-0 z-[110] flex w-[min(18rem,85vw)] flex-col border-l border-zinc-800 bg-zinc-950 shadow-2xl"
-        style={{
-          paddingTop: "max(1.25rem, env(safe-area-inset-top))",
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
+        className="fixed top-0 right-0 z-[110] flex h-[100dvh] max-h-[100dvh] w-max min-w-[11.5rem] max-w-[min(15rem,72vw)] flex-col overflow-y-auto border-l border-zinc-800 bg-zinc-950 shadow-2xl"
+        style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}
       >
-        <div className="flex items-center justify-between px-4 pb-4">
+        <div className="flex items-center justify-between gap-6 px-4 pb-3">
           <span className="text-sm font-medium text-white">Меню</span>
           <button
             type="button"
@@ -134,13 +131,13 @@ function MobileNavDrawer({
           </button>
         </div>
 
-        <ul className="flex flex-col gap-1 px-2">
+        <ul className="flex flex-col gap-0.5 px-2">
           {links.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
                 onClick={onClose}
-                className={`block rounded-lg px-3 py-3 text-base font-medium transition ${
+                className={`block whitespace-nowrap rounded-lg px-3 py-2.5 text-base font-medium transition ${
                   link.accent
                     ? "text-amber-400 hover:bg-zinc-900"
                     : "text-zinc-200 hover:bg-zinc-900"
@@ -152,17 +149,22 @@ function MobileNavDrawer({
           ))}
         </ul>
 
-        <div className="mt-auto border-t border-zinc-800 px-4 pt-4">
+        <div
+          className="mt-auto border-t border-zinc-800 px-4 pt-3"
+          style={{
+            paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
+          }}
+        >
           {isLoggedIn ? (
             <>
               <Link
                 href="/profile"
                 onClick={onClose}
-                className="block truncate py-2 text-sm text-zinc-500 hover:text-zinc-300"
+                className="block max-w-[12rem] truncate py-2 text-sm text-zinc-500 hover:text-zinc-300"
               >
                 {displayName ?? userEmail}
               </Link>
-              <div className="py-2">
+              <div className="pb-1 pt-1">
                 <SignOutButton />
               </div>
             </>
