@@ -15,6 +15,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
+      url: `${origin}/leaderboard`,
+      changeFrequency: "daily",
+      priority: 0.6,
+    },
+    {
       url: `${origin}/login`,
       changeFrequency: "monthly",
       priority: 0.3,

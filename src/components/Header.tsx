@@ -28,6 +28,12 @@ export async function Header() {
           <Link href="/" className="transition-colors hover:text-white">
             Рынки
           </Link>
+          <Link
+            href="/leaderboard"
+            className="transition-colors hover:text-white"
+          >
+            Лидерборд
+          </Link>
           {user && (
             <Link
               href="/portfolio"
