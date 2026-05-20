@@ -62,7 +62,7 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
     title: title || "Название рынка",
     description: description || null,
     category,
-    status: "open",
+    status: isSandbox ? "open" : "draft",
     resolved_side: null,
     closes_at: closesAt ? new Date(closesAt).toISOString() : null,
     resolution_rules: resolutionRules || null,
@@ -153,7 +153,9 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
           `Тестовый рынок создан (не в каталоге на главной): /market/${result.slug}. После проверки — «В каталог» во вкладке «Тестовые».`,
         );
       } else {
-        setMessage(`Рынок в каталоге: /market/${result.slug}`);
+        setMessage(
+          `Черновик сохранён: /market/${result.slug}. Опубликуйте во вкладке «Черновики» в /admin/markets.`,
+        );
       }
     });
   }
@@ -387,15 +389,21 @@ export function AdminMarketWizard({ draft }: { draft?: GammaMarketDraft | null }
               onClick={submit}
               className="rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 disabled:opacity-50"
             >
-              {pending ? "Публикуем…" : "Опубликовать рынок"}
+              {pending
+                ? "Сохраняем…"
+                : isSandbox || isMultiOutcome
+                  ? "Создать тестовый рынок"
+                  : "Сохранить черновик"}
             </button>
           </footer>
           {message && (
             <p
-              className={`text-sm ${message.includes("каталоге") || message.includes("создан") ? "text-emerald-400" : "text-rose-400"}`}
+              className={`text-sm ${message.includes("каталоге") || message.includes("создан") || message.includes("Черновик") ? "text-emerald-400" : "text-rose-400"}`}
             >
               {message}
-              {(message.includes("каталоге") || message.includes("создан")) && (
+              {(message.includes("каталоге") ||
+                message.includes("создан") ||
+                message.includes("Черновик")) && (
                 <>
                   {" "}
                   <Link href={`/market/${slug}`} className="underline">

@@ -1,5 +1,5 @@
 export type MarketCategory = "sport" | "crypto";
-export type MarketStatus = "open" | "closed" | "resolved";
+export type MarketStatus = "draft" | "open" | "closed" | "resolved";
 export type OutcomeSide = "yes" | "no";
 export type OutcomeKey = string;
 export type OutcomeMode = "binary" | "multi";

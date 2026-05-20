@@ -3,6 +3,7 @@ import type { AdminMarketTab } from "@/lib/admin";
 
 const tabs: { id: AdminMarketTab; label: string }[] = [
   { id: "all", label: "Все" },
+  { id: "drafts", label: "Черновики" },
   { id: "active", label: "Активные" },
   { id: "closing_soon", label: "Скоро закрываются" },
   { id: "needs_resolve", label: "Требуют резолва" },

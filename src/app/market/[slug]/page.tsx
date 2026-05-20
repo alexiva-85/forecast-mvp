@@ -27,6 +27,9 @@ export default async function MarketPage({
 
   if (!market) notFound();
 
+  const isDraft = market.status === "draft";
+  const isSandboxHidden = market.is_sandbox;
+
   const platform = await getPlatformSettings(supabase);
 
   const {
@@ -88,6 +91,13 @@ export default async function MarketPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      {(isDraft || isSandboxHidden) && (
+        <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200/90">
+          {isDraft
+            ? "Черновик — рынок не показывается в каталоге. Опубликуйте в админке (вкладка «Черновики»)."
+            : "Тестовый рынок — скрыт из публичного каталога."}
+        </p>
+      )}
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
         <span>{categoryLabel(market.category)}</span>
         <span>·</span>

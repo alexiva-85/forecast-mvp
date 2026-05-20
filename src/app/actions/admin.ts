@@ -198,6 +198,32 @@ export async function closeMarket(marketSlug: string) {
   });
 }
 
+export async function publishDraftMarket(marketSlug: string) {
+  return withSentryServerAction("publishDraftMarket", async () => {
+    const slug = marketSlug.trim().toLowerCase();
+    if (!slug) {
+      return { error: "Укажите slug рынка" };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_publish_draft_market", {
+      p_market_slug: slug,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/markets");
+    revalidatePath(`/market/${slug}`);
+    return {
+      success: "Рынок опубликован — появился в каталоге",
+    };
+  });
+}
+
 export async function publishMarket(marketSlug: string) {
   return withSentryServerAction("publishMarket", async () => {
     const slug = marketSlug.trim().toLowerCase();
@@ -313,6 +339,9 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Market not found")) {
     return "Рынок не найден";
+  }
+  if (message.includes("Market is not draft")) {
+    return "Опубликовать можно только черновик";
   }
   if (message.includes("Invalid outcome")) {
     return "Некорректный исход";

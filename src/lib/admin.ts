@@ -5,6 +5,7 @@ import { refreshExpiredMarkets } from "@/lib/markets";
 
 export type AdminMarketTab =
   | "all"
+  | "drafts"
   | "active"
   | "closing_soon"
   | "needs_resolve"
@@ -51,6 +52,8 @@ const CLOSING_SOON_DAYS = 14;
 
 export function adminStatusLabel(status: MarketStatus): string {
   switch (status) {
+    case "draft":
+      return "Черновик";
     case "open":
       return "Активен";
     case "closed":
@@ -62,6 +65,8 @@ export function adminStatusLabel(status: MarketStatus): string {
 
 export function adminStatusChipClass(status: MarketStatus): string {
   switch (status) {
+    case "draft":
+      return "bg-sky-500/15 text-sky-400";
     case "open":
       return "bg-emerald-500/15 text-emerald-400";
     case "closed":
@@ -144,7 +149,9 @@ export function matchesAdminTab(market: Market, tab: AdminMarketTab): boolean {
 
   switch (tab) {
     case "all":
-      return !market.is_sandbox;
+      return !market.is_sandbox && market.status !== "draft";
+    case "drafts":
+      return !market.is_sandbox && market.status === "draft";
     case "active":
       return !market.is_sandbox && market.status === "open";
     case "closing_soon":
@@ -213,6 +220,7 @@ export function countMarketsByTab(
 ): Record<AdminMarketTab, number> {
   const tabs: AdminMarketTab[] = [
     "all",
+    "drafts",
     "active",
     "closing_soon",
     "needs_resolve",
@@ -482,6 +490,8 @@ export function adminAuditActionLabel(action: string): string {
       return "Закрытие торгов";
     case "market.publish":
       return "В каталог";
+    case "market.publish_draft":
+      return "Опубликован";
     case "user.grant_test_shares":
       return "Тестовые доли";
     case "user.update":

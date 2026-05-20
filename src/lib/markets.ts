@@ -26,7 +26,8 @@ export async function getPopularTags(
   const { data } = await supabase
     .from("markets")
     .select("tags")
-    .eq("is_sandbox", false);
+    .eq("is_sandbox", false)
+    .neq("status", "draft");
   const counts = new Map<string, number>();
 
   for (const row of data ?? []) {
@@ -53,6 +54,7 @@ export async function getMarkets(
     .from("markets")
     .select("*")
     .eq("is_sandbox", false)
+    .neq("status", "draft")
     .order("created_at", { ascending: true });
 
   if (category && category !== "all") {
@@ -171,6 +173,8 @@ export function categoryLabel(category: string): string {
 
 export function marketStatusLabel(status: MarketStatus): string {
   switch (status) {
+    case "draft":
+      return "Черновик";
     case "open":
       return "Открыт";
     case "closed":

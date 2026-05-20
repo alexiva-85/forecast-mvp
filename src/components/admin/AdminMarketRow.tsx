@@ -11,6 +11,7 @@ import { formatOutcomeLabel, resolvedOutcomeKey } from "@/lib/outcomes";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import { AdminMarketCloseButton } from "@/components/admin/AdminMarketCloseButton";
 import { AdminMarketPublishButton } from "@/components/admin/AdminMarketPublishButton";
+import { AdminMarketDraftPublishButton } from "@/components/admin/AdminMarketDraftPublishButton";
 
 export function AdminMarketRow({ market }: { market: AdminMarket }) {
   const resolveHref = `/admin/resolve/${market.slug}`;
@@ -30,6 +31,11 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
             <span className="rounded-md bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
               {categoryLabel(market.category)}
             </span>
+            {market.status === "draft" && !market.is_sandbox && (
+              <span className="rounded-md bg-sky-500/15 px-2 py-0.5 text-xs text-sky-400">
+                Не в каталоге
+              </span>
+            )}
             {market.is_sandbox && (
               <span
                 className={`rounded-md px-2 py-0.5 text-xs ${sandboxBadgeClass()}`}
@@ -70,6 +76,9 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
         </section>
         <section className="flex shrink-0 flex-col items-end gap-2">
           {showClose && <AdminMarketCloseButton slug={market.slug} />}
+          {market.status === "draft" && !market.is_sandbox && (
+            <AdminMarketDraftPublishButton slug={market.slug} />
+          )}
           {market.is_sandbox && (
             <AdminMarketPublishButton slug={market.slug} />
           )}

@@ -70,6 +70,7 @@ export default async function AdminMarketsPage({
 function isValidTab(t: string): t is AdminMarketTab {
   return [
     "all",
+    "drafts",
     "active",
     "closing_soon",
     "needs_resolve",

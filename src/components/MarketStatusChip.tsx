@@ -2,6 +2,7 @@ import { marketStatusLabel } from "@/lib/markets";
 import type { MarketStatus } from "@/lib/types";
 
 const CHIP_CLASS: Record<MarketStatus, string> = {
+  draft: "bg-sky-500/10 text-sky-400",
   open: "bg-emerald-500/10 text-emerald-400",
   closed: "bg-amber-500/10 text-amber-400",
   resolved: "bg-zinc-700/60 text-zinc-400",
