@@ -10,7 +10,11 @@ export type AdminMarketTab =
   | "closing_soon"
   | "needs_resolve"
   | "resolved"
+  | "archive"
   | "sandbox";
+
+/** Завершённые рынки старше этого порога попадают во вкладку «Архив» (A6). */
+export const ADMIN_MARKET_ARCHIVE_DAYS = 30;
 
 export interface AdminMarketStats {
   trade_count: number;
@@ -49,6 +53,16 @@ export interface AdminOverview {
 const MAX_OVERVIEW_ACTIONS = 5;
 
 const CLOSING_SOON_DAYS = 14;
+
+function isArchivedResolvedMarket(market: Market): boolean {
+  if (market.status !== "resolved") return false;
+  const resolvedAt = market.resolved_at
+    ? new Date(market.resolved_at).getTime()
+    : null;
+  if (resolvedAt == null) return false;
+  const ageMs = Date.now() - resolvedAt;
+  return ageMs > ADMIN_MARKET_ARCHIVE_DAYS * 24 * 60 * 60 * 1000;
+}
 
 export function adminStatusLabel(status: MarketStatus): string {
   switch (status) {
@@ -159,7 +173,13 @@ export function matchesAdminTab(market: Market, tab: AdminMarketTab): boolean {
     case "needs_resolve":
       return !market.is_sandbox && market.status === "closed";
     case "resolved":
-      return !market.is_sandbox && market.status === "resolved";
+      return (
+        !market.is_sandbox &&
+        market.status === "resolved" &&
+        !isArchivedResolvedMarket(market)
+      );
+    case "archive":
+      return !market.is_sandbox && isArchivedResolvedMarket(market);
     case "sandbox":
       return market.is_sandbox;
   }
@@ -225,6 +245,7 @@ export function countMarketsByTab(
     "closing_soon",
     "needs_resolve",
     "resolved",
+    "archive",
     "sandbox",
   ];
   return Object.fromEntries(
@@ -500,6 +521,8 @@ export function adminAuditActionLabel(action: string): string {
       return "Пользователь";
     case "platform.set_fee_rate":
       return "Комиссия";
+    case "report.update":
+      return "Жалоба";
     default:
       return action;
   }
@@ -529,6 +552,54 @@ export async function fetchAdminAuditLog(
     summary: row.summary,
     metadata: row.metadata ?? {},
   }));
+}
+
+export interface AdminFeeRateHistoryEntry {
+  id: string;
+  created_at: string;
+  admin_id: string;
+  admin_display_name: string | null;
+  summary: string;
+  old_rate: number;
+  new_rate: number;
+}
+
+type AdminFeeRateHistoryRow = {
+  id: string;
+  created_at: string;
+  admin_id: string;
+  admin_display_name: string | null;
+  summary: string;
+  old_rate: number | string | null;
+  new_rate: number | string | null;
+};
+
+export async function fetchAdminFeeRateHistory(
+  supabase: SupabaseClient,
+  limit = 30,
+): Promise<AdminFeeRateHistoryEntry[]> {
+  const { data, error } = await supabase.rpc("admin_fee_rate_history_list", {
+    p_limit: limit,
+  });
+  if (error) throw error;
+
+  return ((data ?? []) as AdminFeeRateHistoryRow[]).map((row) => ({
+    id: row.id,
+    created_at: row.created_at,
+    admin_id: row.admin_id,
+    admin_display_name: row.admin_display_name ?? null,
+    summary: row.summary,
+    old_rate: Number(row.old_rate ?? 0),
+    new_rate: Number(row.new_rate ?? 0),
+  }));
+}
+
+export async function fetchAdminPendingReportsCount(
+  supabase: SupabaseClient,
+): Promise<number> {
+  const { data, error } = await supabase.rpc("admin_pending_reports_count");
+  if (error) throw error;
+  return Number(data ?? 0);
 }
 
 export async function fetchAdminResolveReminder(

@@ -363,6 +363,30 @@ export async function setTradeFeeRate(ratePercent: number) {
 
     revalidatePath("/admin");
     revalidatePath("/admin/settings");
+    revalidatePath("/admin/audit");
+    return { success: true };
+  });
+}
+
+export async function updateContentReport(input: {
+  reportId: string;
+  status: "reviewed" | "dismissed" | "action_taken";
+  adminNote: string;
+}) {
+  return withSentryServerAction("updateContentReport", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_update_content_report", {
+      p_report_id: input.reportId,
+      p_status: input.status,
+      p_admin_note: input.adminNote.trim() || null,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    revalidatePath("/admin/reports");
+    revalidatePath("/admin/audit");
     return { success: true };
   });
 }
@@ -439,6 +463,12 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Invalid share amount")) {
     return "Некорректное количество долей";
+  }
+  if (message.includes("Report not found")) {
+    return "Жалоба не найдена";
+  }
+  if (message.includes("Report already processed")) {
+    return "Жалоба уже обработана";
   }
   reportUnexpectedRpcError("admin", message);
   return message;

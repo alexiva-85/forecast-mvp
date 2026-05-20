@@ -8,6 +8,7 @@ const tabs: { id: AdminMarketTab; label: string }[] = [
   { id: "closing_soon", label: "Скоро закрываются" },
   { id: "needs_resolve", label: "Требуют резолва" },
   { id: "resolved", label: "Завершённые" },
+  { id: "archive", label: "Архив" },
   { id: "sandbox", label: "Тестовые" },
 ];
 

@@ -15,6 +15,7 @@ import { parseChecklist, parseTags } from "@/lib/types";
 import Link from "next/link";
 import { getPlatformSettings } from "@/lib/platform";
 import { buildOutcomeLabelMap } from "@/lib/outcomes";
+import { MarketReportButton } from "@/components/MarketReportButton";
 
 export default async function MarketPage({
   params,
@@ -137,10 +138,15 @@ export default async function MarketPage({
         </div>
       )}
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-4">
         <ResolutionRules
           rules={market.resolution_rules}
           checklist={parseChecklist(market.resolution_checklist)}
+        />
+        <MarketReportButton
+          marketSlug={market.slug}
+          marketTitle={market.title}
+          isLoggedIn={!!user}
         />
       </div>
 

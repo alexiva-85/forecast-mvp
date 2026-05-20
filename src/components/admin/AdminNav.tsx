@@ -9,6 +9,7 @@ const links = [
   { href: "/admin/markets/new", label: "Создать", exact: false },
   { href: "/admin/resolve", label: "Резолв", exact: false },
   { href: "/admin/ideas", label: "Идеи", exact: false },
+  { href: "/admin/reports", label: "Жалобы", exact: false },
   { href: "/admin/users", label: "Пользователи", exact: false },
   { href: "/admin/trading", label: "Сделки", exact: false },
   { href: "/admin/audit", label: "Журнал", exact: false },
@@ -17,8 +18,10 @@ const links = [
 
 export function AdminNav({
   resolveQueueCount = 0,
+  pendingReportsCount = 0,
 }: {
   resolveQueueCount?: number;
+  pendingReportsCount?: number;
 }) {
   const pathname = usePathname();
 
@@ -45,6 +48,11 @@ export function AdminNav({
             {href === "/admin/resolve" && resolveQueueCount > 0 && (
               <span className="rounded-full bg-amber-500/25 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-300">
                 {resolveQueueCount > 99 ? "99+" : resolveQueueCount}
+              </span>
+            )}
+            {href === "/admin/reports" && pendingReportsCount > 0 && (
+              <span className="rounded-full bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-rose-300">
+                {pendingReportsCount > 99 ? "99+" : pendingReportsCount}
               </span>
             )}
           </Link>

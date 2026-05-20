@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import {
+  ADMIN_MARKET_ARCHIVE_DAYS,
   countMarketsByTab,
   fetchAdminMarkets,
   filterAdminMarkets,
@@ -54,6 +55,13 @@ export default async function AdminMarketsPage({
         <AdminMarketsSearch tab={tab} category={category} q={q} />
       </Suspense>
 
+      {tab === "archive" && (
+        <p className="text-sm text-zinc-500">
+          Завершённые рынки старше {ADMIN_MARKET_ARCHIVE_DAYS} дней — история
+          сохранена, в основном списке не мешают.
+        </p>
+      )}
+
       <ul className="space-y-4">
         {filtered.length === 0 ? (
           <li className="rounded-xl border border-zinc-800 px-4 py-8 text-center text-sm text-zinc-500">
@@ -75,6 +83,7 @@ function isValidTab(t: string): t is AdminMarketTab {
     "closing_soon",
     "needs_resolve",
     "resolved",
+    "archive",
     "sandbox",
   ].includes(t);
 }

@@ -1,13 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AdminFeeSettings } from "@/components/admin/AdminFeeSettings";
+import { AdminFeeRateHistory } from "@/components/admin/AdminFeeRateHistory";
 import { AdminGrantTestShares } from "@/components/admin/AdminGrantTestShares";
+import { fetchAdminFeeRateHistory } from "@/lib/admin";
 import { getPlatformSettings } from "@/lib/platform";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
   const supabase = await createClient();
   const platform = await getPlatformSettings(supabase);
+  const feeHistory = await fetchAdminFeeRateHistory(supabase);
 
   return (
     <section className="space-y-8">
@@ -22,6 +25,8 @@ export default async function AdminSettingsPage() {
         tradeFeeRate={platform.tradeFeeRate}
         feeBalance={platform.feeBalance}
       />
+
+      <AdminFeeRateHistory entries={feeHistory} />
 
       <AdminGrantTestShares />
 
