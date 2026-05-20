@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  gammaDraftToCreateMarketInput,
   gammaSlugToForecast,
   inferGammaCategory,
   isBinaryYesNoMarket,
@@ -59,6 +60,22 @@ describe("C6 — Gamma mapping", () => {
     expect(draft.resolutionRules).toContain("Binance");
     expect(draft.resolutionChecklist.split("\n").length).toBeGreaterThan(2);
     expect(draft.referenceYesPrice).toBe(0.42);
+  });
+
+  it("maps draft to admin_create_market params (A14)", () => {
+    const draft = mapGammaMarketToDraft(sampleMarket);
+    const input = gammaDraftToCreateMarketInput(draft);
+
+    expect(input.p_slug).toMatch(/^ref-[a-z0-9]+(-[a-z0-9]+)*$/);
+    expect(input.p_title).toBe(sampleMarket.question);
+    expect(input.p_category).toBe("crypto");
+    expect(input.p_is_sandbox).toBe(false);
+    expect(input.p_outcomes).toBeNull();
+    expect(input.p_resolution_checklist.length).toBeGreaterThan(0);
+    expect(input.p_resolution_rules).toContain("Binance");
+    expect(input.p_closes_at).not.toBeNull();
+    expect(new Date(input.p_closes_at!).getUTCFullYear()).toBe(2026);
+    expect(input.p_tags).toContain("crypto");
   });
 
   it("filters idea candidates", () => {

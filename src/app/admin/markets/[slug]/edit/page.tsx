@@ -10,11 +10,11 @@ export default async function AdminMarketEditPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; gamma?: string }>;
 }) {
   await requireAdmin();
   const { slug } = await params;
-  const { saved } = await searchParams;
+  const { saved, gamma } = await searchParams;
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -50,6 +50,12 @@ export default async function AdminMarketEditPage({
           Редактирование
         </h2>
         <p className="mt-1 text-sm text-zinc-500">{market.title}</p>
+        {gamma === "1" && (
+          <p className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-sm text-emerald-400/90">
+            Черновик создан из Gamma. Проверьте правила и дату закрытия перед
+            публикацией во вкладке «Черновики».
+          </p>
+        )}
         {saved === "1" && (
           <p className="mt-2 text-sm text-emerald-400">Изменения сохранены</p>
         )}

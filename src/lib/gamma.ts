@@ -171,6 +171,38 @@ export function buildResolutionRules(market: GammaRawMarket): string {
   );
 }
 
+/** Параметры RPC `admin_create_market` из шаблона Gamma (A14). */
+export function gammaDraftToCreateMarketInput(draft: GammaMarketDraft) {
+  const checklist = draft.resolutionChecklist
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const tags = draft.tags
+    .split(/[,;\n]/)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const closesAtRaw = draft.closesAt.trim();
+  const closesAt = closesAtRaw
+    ? new Date(closesAtRaw).toISOString()
+    : null;
+
+  return {
+    p_slug: draft.slug.trim().toLowerCase(),
+    p_title: draft.title.trim(),
+    p_description: draft.description.trim() || null,
+    p_category: draft.category,
+    p_closes_at: closesAt,
+    p_resolution_rules: draft.resolutionRules.trim(),
+    p_resolution_checklist: checklist,
+    p_tags: tags,
+    p_is_sandbox: false as const,
+    p_outcomes: null as null,
+  };
+}
+
 export function mapGammaMarketToDraft(market: GammaRawMarket): GammaMarketDraft {
   const polymarketUrl = `${POLYMARKET_MARKET_URL}/${market.slug}`;
   const description = (market.description ?? "").trim();

@@ -1,16 +1,70 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   GAMMA_API_URL,
   flattenGammaSearchEvents,
+  gammaDraftToCreateMarketInput,
   pickGammaIdeas,
+  type GammaMarketDraft,
   type GammaMarketIdea,
   type GammaRawMarket,
 } from "@/lib/gamma";
 
 const FETCH_TIMEOUT_MS = 12_000;
 const DEFAULT_LIMIT = 12;
+
+export async function createDraftFromGamma(
+  draft: GammaMarketDraft,
+): Promise<{ slug: string; marketId: string } | { error: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Войдите в аккаунт" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.is_admin) {
+    return { error: "Только для администратора" };
+  }
+
+  const input = gammaDraftToCreateMarketInput(draft);
+
+  if (!input.p_title || !input.p_resolution_rules) {
+    return { error: "Недостаточно данных из Gamma" };
+  }
+  if (input.p_resolution_checklist.length === 0) {
+    return { error: "Добавьте чеклист резолва" };
+  }
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(input.p_slug)) {
+    return { error: "Некорректный slug" };
+  }
+
+  const { data, error } = await supabase.rpc("admin_create_market", input);
+
+  if (error) {
+    return { error: mapGammaCreateError(error.message) };
+  }
+
+  const slug = input.p_slug;
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/markets");
+  revalidatePath("/admin/ideas");
+  revalidatePath(`/admin/markets/${slug}/edit`);
+  revalidatePath(`/market/${slug}`);
+
+  return { slug, marketId: data as string };
+}
 
 export async function fetchGammaIdeas(
   query?: string,
@@ -81,6 +135,25 @@ async function searchGammaMarkets(q: string, limit: number): Promise<GammaRawMar
   const fromEvents = flattenGammaSearchEvents(body.events);
   const direct = body.markets ?? [];
   return [...fromEvents, ...direct];
+}
+
+function mapGammaCreateError(message: string): string {
+  if (message.includes("Admin only")) {
+    return "Только для администратора";
+  }
+  if (message.includes("Invalid slug")) {
+    return "Некорректный slug";
+  }
+  if (message.includes("duplicate key") || message.includes("markets_slug_key")) {
+    return "Черновик с таким slug уже есть — откройте его в «Черновики»";
+  }
+  if (message.includes("Resolution rules required")) {
+    return "Укажите правила резолва";
+  }
+  if (message.includes("Resolution checklist required")) {
+    return "Добавьте хотя бы один пункт чеклиста";
+  }
+  return message;
 }
 
 async function fetchWithTimeout(url: string): Promise<Response> {
