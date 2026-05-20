@@ -9,7 +9,7 @@ export default function AccountLayout({
   return (
     <section className="border-t border-zinc-900 bg-zinc-950">
       <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] max-w-7xl flex-col lg:flex-row">
-        <aside className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 order-1 w-full shrink-0 border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur lg:static lg:top-auto lg:z-auto lg:order-2 lg:w-56 lg:border-b-0 lg:border-l lg:py-6 lg:pl-6 lg:pr-4">
+        <aside className="account-mobile-nav sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 order-1 w-full shrink-0 border-b border-zinc-800 bg-zinc-950 px-4 py-3 lg:static lg:top-auto lg:z-auto lg:order-2 lg:w-56 lg:border-b-0 lg:border-l lg:bg-zinc-950/95 lg:py-6 lg:pl-6 lg:pr-4 lg:backdrop-blur">
           <header className="mb-4 hidden px-1 lg:block">
             <Link
               href="/"

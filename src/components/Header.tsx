@@ -29,7 +29,8 @@ export async function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur pt-[env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-50 border-b border-zinc-800 pt-[env(safe-area-inset-top)]">
+      <div className="bg-zinc-950/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
         <Link
           href="/"
@@ -92,6 +93,7 @@ export async function Header() {
           displayName={profile?.display_name}
           balance={profile?.balance != null ? Number(profile.balance) : null}
         />
+      </div>
       </div>
     </header>
   );

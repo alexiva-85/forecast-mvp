@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { SignOutButton } from "@/components/SignOutButton";
 
 type NavLink = { href: string; label: string; accent?: boolean };
@@ -20,9 +21,18 @@ export function MobileNav({
   isLoggedIn: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      document.documentElement.removeAttribute("data-mobile-nav-open");
+      return;
+    }
+    document.documentElement.setAttribute("data-mobile-nav-open", "");
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     function onKeyDown(e: KeyboardEvent) {
@@ -30,10 +40,25 @@ export function MobileNav({
     }
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      document.documentElement.removeAttribute("data-mobile-nav-open");
       document.body.style.overflow = prev;
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  const drawer =
+    mounted && open
+      ? createPortal(
+          <MobileNavDrawer
+            links={links}
+            isLoggedIn={isLoggedIn}
+            userEmail={userEmail}
+            displayName={displayName}
+            onClose={() => setOpen(false)}
+          />,
+          document.body,
+        )
+      : null;
 
   return (
     <div className="flex items-center gap-2 md:hidden">
@@ -61,82 +86,98 @@ export function MobileNav({
         <MenuIcon open={open} />
       </button>
 
-      {open && (
-        <>
+      {drawer}
+    </div>
+  );
+}
+
+function MobileNavDrawer({
+  links,
+  isLoggedIn,
+  userEmail,
+  displayName,
+  onClose,
+}: {
+  links: NavLink[];
+  isLoggedIn: boolean;
+  userEmail?: string | null;
+  displayName?: string | null;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Закрыть меню"
+        className="fixed inset-0 z-[100] bg-black/70"
+        onClick={onClose}
+      />
+      <nav
+        id="mobile-nav-panel"
+        className="fixed inset-y-0 right-0 z-[110] flex w-[min(18rem,85vw)] flex-col border-l border-zinc-800 bg-zinc-950 shadow-2xl"
+        style={{
+          paddingTop: "max(1.25rem, env(safe-area-inset-top))",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        <div className="flex items-center justify-between px-4 pb-4">
+          <span className="text-sm font-medium text-white">Меню</span>
           <button
             type="button"
-            aria-label="Закрыть меню"
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]"
-            onClick={() => setOpen(false)}
-          />
-          <nav
-            id="mobile-nav-panel"
-            className="fixed inset-y-0 right-0 z-[70] flex w-[min(100vw-3rem,18rem)] flex-col border-l border-zinc-800 bg-zinc-950 px-4 py-5 shadow-2xl"
-            style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top))" }}
+            aria-label="Закрыть"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-800 hover:text-white"
           >
-            <div className="mb-6 flex items-center justify-between">
-              <span className="text-sm font-medium text-white">Меню</span>
-              <button
-                type="button"
-                aria-label="Закрыть"
-                onClick={() => setOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-800 hover:text-white"
+            <span aria-hidden className="text-xl leading-none">
+              ×
+            </span>
+          </button>
+        </div>
+
+        <ul className="flex flex-col gap-1 px-2">
+          {links.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                onClick={onClose}
+                className={`block rounded-lg px-3 py-3 text-base font-medium transition ${
+                  link.accent
+                    ? "text-amber-400 hover:bg-zinc-900"
+                    : "text-zinc-200 hover:bg-zinc-900"
+                }`}
               >
-                <span aria-hidden className="text-xl leading-none">
-                  ×
-                </span>
-              </button>
-            </div>
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
 
-            <ul className="flex flex-col gap-1">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={`block rounded-lg px-3 py-3 text-base font-medium transition ${
-                      link.accent
-                        ? "text-amber-400 hover:bg-zinc-900"
-                        : "text-zinc-200 hover:bg-zinc-900"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <div
-              className="mt-auto border-t border-zinc-800 pt-4"
-              style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        <div className="mt-auto border-t border-zinc-800 px-4 pt-4">
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/profile"
+                onClick={onClose}
+                className="block truncate py-2 text-sm text-zinc-500 hover:text-zinc-300"
+              >
+                {displayName ?? userEmail}
+              </Link>
+              <div className="py-2">
+                <SignOutButton />
+              </div>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="block rounded-lg bg-white px-4 py-3 text-center text-sm font-medium text-zinc-900 hover:bg-zinc-200"
             >
-              {isLoggedIn ? (
-                <>
-                  <Link
-                    href="/profile"
-                    onClick={() => setOpen(false)}
-                    className="block truncate px-3 py-2 text-sm text-zinc-500 hover:text-zinc-300"
-                  >
-                    {displayName ?? userEmail}
-                  </Link>
-                  <div className="px-3 py-2">
-                    <SignOutButton />
-                  </div>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="block rounded-lg bg-white px-4 py-3 text-center text-sm font-medium text-zinc-900 hover:bg-zinc-200"
-                >
-                  Войти
-                </Link>
-              )}
-            </div>
-          </nav>
-        </>
-      )}
-    </div>
+              Войти
+            </Link>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }
 
