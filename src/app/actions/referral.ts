@@ -37,7 +37,7 @@ export async function applyReferralCode(rawCode: string) {
     });
 
     if (error) {
-      reportUnexpectedRpcError("apply_referral_code", error);
+      reportUnexpectedRpcError("apply_referral_code", error.message);
       return { error: mapApplyReferralError(error.message) };
     }
 
@@ -68,7 +68,7 @@ export async function applyReferralFromCookie() {
     );
 
     if (summaryError) {
-      reportUnexpectedRpcError("get_my_referral_summary", summaryError);
+      reportUnexpectedRpcError("get_my_referral_summary", summaryError.message);
       return { skipped: true as const };
     }
 
@@ -93,7 +93,7 @@ export async function applyReferralFromCookie() {
         await clearReferralCookie();
       }
       if (!msg.includes("already applied") && !msg.includes("window expired")) {
-        reportUnexpectedRpcError("apply_referral_code", error);
+        reportUnexpectedRpcError("apply_referral_code", error.message);
       }
       return { skipped: true as const, error: mapApplyReferralError(error.message) };
     }
