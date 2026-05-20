@@ -14,6 +14,7 @@
 | Резолв | `/admin/resolve` | Очередь `closed` → отдельный экран фиксации |
 | Идеи | `/admin/ideas` | Gamma (read-only) → черновик в мастере |
 | Пользователи | `/admin/users` | Модерация, KYC-заготовка, лимиты G2 (A11) |
+| Сделки | `/admin/trading` | Сделки и заявки: поиск, фильтр статуса (A12) |
 | Журнал | `/admin/audit` | Лог действий операторов (A4) |
 | Настройки | `/admin/settings` | Комиссия, лимиты; SQL только в dev-блоке |
 
@@ -61,7 +62,7 @@ draft  →  open  →  closed  →  resolved
 | A9 | Дашборд: оборот 24ч / 7д / 30д, топ рынков | `done` — обзор `/admin`, RPC `admin_platform_volume`, `admin_top_markets_by_volume` |
 | A10 | `created_by` на рынках | Несколько операторов |
 | A11 | Раздел «Пользователи» (D2–D4) | `done` — `/admin/users`, RPC `admin_users_list` / `admin_update_user`, блокировка торгов, KYC-статус, множитель лимита |
-| A12 | Раздел «Сделки / ордера» | Поддержка и расследования |
+| A12 | Раздел «Сделки / ордера» | `done` — `/admin/trading`, `/admin/trading/orders`, RPC `admin_trades_list` / `admin_orders_list` |
 | A13 | История изменений ставки комиссии | Комплаенс |
 
 ### Интеграции
@@ -81,4 +82,4 @@ draft  →  open  →  closed  →  resolved
 
 ---
 
-*Обновлено: 2026-05-20*
+*Обновлено: 2026-05-20 (A12)*

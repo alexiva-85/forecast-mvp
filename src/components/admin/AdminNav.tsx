@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/resolve", label: "Резолв", exact: false },
   { href: "/admin/ideas", label: "Идеи", exact: false },
   { href: "/admin/users", label: "Пользователи", exact: false },
+  { href: "/admin/trading", label: "Сделки", exact: false },
   { href: "/admin/audit", label: "Журнал", exact: false },
   { href: "/admin/settings", label: "Настройки", exact: false },
 ] as const;
