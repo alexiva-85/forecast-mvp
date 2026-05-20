@@ -96,6 +96,73 @@ export async function createMarket(formData: FormData) {
   });
 }
 
+export async function updateMarket(formData: FormData) {
+  return withSentryServerAction("updateMarket", async () => {
+    const marketSlug = (formData.get("marketSlug") as string).trim().toLowerCase();
+    const title = (formData.get("title") as string).trim();
+    const description = (formData.get("description") as string).trim();
+    const category = formData.get("category") as MarketCategory;
+    const closesAtRaw = (formData.get("closesAt") as string).trim();
+    const resolutionRules = (formData.get("resolutionRules") as string).trim();
+    const checklistRaw = (formData.get("resolutionChecklist") as string).trim();
+    const tagsRaw = (formData.get("tags") as string).trim();
+    const newSlugRaw = (formData.get("newSlug") as string | null)?.trim().toLowerCase();
+
+    const checklist = checklistRaw
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const tags = tagsRaw
+      .split(/[,;\n]/)
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!marketSlug || !title || !resolutionRules || checklist.length === 0) {
+      return { error: "Заполните обязательные поля" };
+    }
+
+    if (newSlugRaw && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(newSlugRaw)) {
+      return { error: "Slug: только латиница, цифры и дефисы" };
+    }
+
+    const closesAt = closesAtRaw
+      ? new Date(closesAtRaw).toISOString()
+      : null;
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("admin_update_market", {
+      p_market_slug: marketSlug,
+      p_title: title,
+      p_description: description || null,
+      p_category: category,
+      p_closes_at: closesAt,
+      p_resolution_rules: resolutionRules,
+      p_resolution_checklist: checklist,
+      p_tags: tags,
+      p_new_slug: newSlugRaw && newSlugRaw !== marketSlug ? newSlugRaw : null,
+    });
+
+    if (error) {
+      return { error: mapAdminError(error.message) };
+    }
+
+    const slug = (data as string) ?? marketSlug;
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/markets");
+    revalidatePath("/admin/audit");
+    revalidatePath(`/market/${slug}`);
+    if (slug !== marketSlug) {
+      revalidatePath(`/market/${marketSlug}`);
+      revalidatePath(`/admin/markets/${marketSlug}/edit`);
+    }
+    revalidatePath(`/admin/markets/${slug}/edit`);
+    return { success: true, slug };
+  });
+}
+
 export async function adminResolveMarket(
   marketId: string,
   outcomeKey: string,
@@ -342,6 +409,12 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Market is not draft")) {
     return "Опубликовать можно только черновик";
+  }
+  if (message.includes("Cannot edit resolved market")) {
+    return "Завершённый рынок нельзя редактировать";
+  }
+  if (message.includes("Slug cannot be changed after publish")) {
+    return "Slug нельзя менять после публикации";
   }
   if (message.includes("Invalid outcome")) {
     return "Некорректный исход";

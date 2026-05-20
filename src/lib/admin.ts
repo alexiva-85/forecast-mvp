@@ -492,6 +492,8 @@ export function adminAuditActionLabel(action: string): string {
       return "В каталог";
     case "market.publish_draft":
       return "Опубликован";
+    case "market.update":
+      return "Редактирование рынка";
     case "user.grant_test_shares":
       return "Тестовые доли";
     case "user.update":

@@ -79,6 +79,12 @@ export default async function AdminResolveMarketPage({
         <div className="flex flex-wrap items-center gap-4">
           <AdminMarketCloseButton slug={market.slug} />
           <Link
+            href={`/admin/markets/${slug}/edit`}
+            className="text-sm text-zinc-400 hover:text-white"
+          >
+            Редактировать
+          </Link>
+          <Link
             href={`/market/${slug}`}
             className="text-sm text-emerald-400 hover:underline"
           >

@@ -17,6 +17,8 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
   const resolveHref = `/admin/resolve/${market.slug}`;
   const showResolve = market.status === "closed";
   const showClose = market.status === "open";
+  const showEdit = market.status !== "resolved";
+  const editHref = `/admin/markets/${market.slug}/edit`;
 
   return (
     <li className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
@@ -75,6 +77,14 @@ export function AdminMarketRow({ market }: { market: AdminMarket }) {
           )}
         </section>
         <section className="flex shrink-0 flex-col items-end gap-2">
+          {showEdit && (
+            <Link
+              href={editHref}
+              className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:text-white"
+            >
+              Редактировать
+            </Link>
+          )}
           {showClose && <AdminMarketCloseButton slug={market.slug} />}
           {market.status === "draft" && !market.is_sandbox && (
             <AdminMarketDraftPublishButton slug={market.slug} />
