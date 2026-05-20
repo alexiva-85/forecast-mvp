@@ -2,14 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { setTradeFeeRate } from "@/app/actions/admin";
-import { formatFeePercent } from "@/lib/platform";
+import { formatFeePercent, type PlatformFeeReconcile } from "@/lib/platform";
 
 export function AdminFeeSettings({
   tradeFeeRate,
   feeBalance,
+  reconcile,
 }: {
   tradeFeeRate: number;
   feeBalance: number;
+  reconcile: PlatformFeeReconcile | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -36,6 +38,34 @@ export function AdminFeeSettings({
         Текущая ставка: {formatFeePercent(tradeFeeRate)} · Накоплено: $
         {feeBalance.toLocaleString("ru-RU", { maximumFractionDigits: 2 })}
       </p>
+      {reconcile && (
+        <div className="mt-2 space-y-1 text-xs">
+          <p
+            className={
+              reconcile.ledgerReconcileOk
+                ? "text-emerald-400/90"
+                : "text-amber-400/90"
+            }
+          >
+            Ledger ↔ сделки: $
+            {reconcile.tradesFeeTotal.toFixed(2)} / $
+            {reconcile.ledgerFeeTotal.toFixed(2)} ·{" "}
+            {reconcile.ledgerReconcileOk ? "OK" : "расхождение"}
+          </p>
+          <p
+            className={
+              reconcile.balanceReconcileOk
+                ? "text-zinc-500"
+                : "text-amber-400/90"
+            }
+          >
+            Накоплено ↔ Σ сделок: $
+            {reconcile.feeBalance.toFixed(2)} / $
+            {reconcile.tradesFeeTotal.toFixed(2)}
+            {!reconcile.balanceReconcileOk && " · проверьте fee_balance"}
+          </p>
+        </div>
+      )}
       <label className="mt-4 block">
         <span className="mb-1 block text-xs text-zinc-500">
           Новая ставка, % (0–5)

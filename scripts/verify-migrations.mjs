@@ -309,6 +309,27 @@ const checks = [
     },
   },
   {
+    name: "F1 — balance_ledger trade_fee",
+    async run() {
+      const res = await fetch(
+        `${url}/rest/v1/balance_ledger?select=trade_id,kind&kind=eq.trade_fee&limit=1`,
+        { headers: headers() },
+      );
+      return res.ok;
+    },
+  },
+  {
+    name: "F1 — admin_platform_fee_summary",
+    async run() {
+      const res = await rpc("admin_platform_fee_summary", {});
+      return (
+        res.code === "P0001" ||
+        res.message?.includes("Admin only") ||
+        res.message?.includes("Not authenticated")
+      );
+    },
+  },
+  {
     name: "C7 — admin_resolve closed only",
     async run() {
       const res = await rpc("admin_resolve_market", {

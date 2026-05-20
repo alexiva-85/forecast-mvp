@@ -4,12 +4,13 @@ import { AdminFeeSettings } from "@/components/admin/AdminFeeSettings";
 import { AdminFeeRateHistory } from "@/components/admin/AdminFeeRateHistory";
 import { AdminGrantTestShares } from "@/components/admin/AdminGrantTestShares";
 import { fetchAdminFeeRateHistory } from "@/lib/admin";
-import { getPlatformSettings } from "@/lib/platform";
+import { fetchPlatformFeeReconcile, getPlatformSettings } from "@/lib/platform";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
   const supabase = await createClient();
   const platform = await getPlatformSettings(supabase);
+  const feeReconcile = await fetchPlatformFeeReconcile(supabase);
   const feeHistory = await fetchAdminFeeRateHistory(supabase);
 
   return (
@@ -24,6 +25,7 @@ export default async function AdminSettingsPage() {
       <AdminFeeSettings
         tradeFeeRate={platform.tradeFeeRate}
         feeBalance={platform.feeBalance}
+        reconcile={feeReconcile}
       />
 
       <AdminFeeRateHistory entries={feeHistory} />

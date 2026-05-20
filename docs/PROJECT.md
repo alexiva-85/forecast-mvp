@@ -130,7 +130,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 
 | ID | Задача | Статус |
 |----|--------|--------|
-| F1 | Trading fee в контракте/БД | `planned` |
+| F1 | Trading fee в контракте/БД | `done` (off-chain: B6 + `trade_fee` в ledger, сверка в `/admin/settings`; on-chain fee — E5) |
 | F2 | Реферальная программа | `done` (код + `?ref=`, бонусы через ledger, `/portfolio/referral`) |
 | F3 | Лидерборды, объём | `done` |
 | F4 | SEO, лендинг, онбординг RU | `done` |
