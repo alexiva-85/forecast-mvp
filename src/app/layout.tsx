@@ -14,6 +14,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteOrigin()),
   title: {
@@ -54,7 +60,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-zinc-950 text-zinc-100">
         <Header />
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-zinc-900 py-6 text-center text-xs text-zinc-600">
+        <footer className="border-t border-zinc-900 px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] text-center text-xs text-zinc-600">
           Тестовые деньги · MVP · Не является финансовой услугой
         </footer>
       </body>

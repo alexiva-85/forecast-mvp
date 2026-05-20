@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/SignOutButton";
+import { MobileNav } from "@/components/MobileNav";
 
 export async function Header() {
   const supabase = await createClient();
@@ -18,51 +19,60 @@ export async function Header() {
     profile = data;
   }
 
+  const navLinks = [
+    { href: "/", label: "Рынки" },
+    { href: "/leaderboard", label: "Лидерборд" },
+    ...(user ? [{ href: "/portfolio", label: "Кабинет" }] : []),
+    ...(profile?.is_admin
+      ? [{ href: "/admin", label: "Админ", accent: true }]
+      : []),
+  ];
+
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-white">
+    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
+        <Link
+          href="/"
+          className="shrink-0 text-lg font-semibold tracking-tight text-white"
+        >
           Forecast<span className="text-emerald-400">MVP</span>
         </Link>
-        <nav className="flex items-center gap-4 text-sm text-zinc-400">
-          <Link href="/" className="transition-colors hover:text-white">
-            Рынки
-          </Link>
-          <Link
-            href="/leaderboard"
-            className="transition-colors hover:text-white"
-          >
-            Лидерборд
-          </Link>
-          {user && (
+
+        <nav
+          className="hidden items-center gap-4 text-sm text-zinc-400 md:flex"
+          aria-label="Основная навигация"
+        >
+          {navLinks.map((link) => (
             <Link
-              href="/portfolio"
-              className="transition-colors hover:text-white"
+              key={link.href}
+              href={link.href}
+              className={`transition-colors hover:text-white ${
+                link.accent ? "text-amber-400/90 hover:text-amber-300" : ""
+              }`}
             >
-              Кабинет
+              {link.label}
             </Link>
-          )}
-          {profile?.is_admin && (
-            <Link href="/admin" className="transition-colors hover:text-amber-400">
-              Админ
-            </Link>
-          )}
+          ))}
         </nav>
-        <div className="flex items-center gap-3 text-sm">
+
+        <div className="hidden items-center gap-3 text-sm md:flex">
           {user && profile ? (
             <>
               <Link
                 href="/profile"
-                className="hidden text-zinc-500 transition-colors hover:text-white sm:inline"
+                className="max-w-[10rem] truncate text-zinc-500 transition-colors hover:text-white"
               >
                 {profile.display_name ?? user.email}
               </Link>
-              <span className="rounded-full bg-emerald-500/15 px-3 py-1 font-medium text-emerald-400">
+              <Link
+                href="/portfolio"
+                className="rounded-full bg-emerald-500/15 px-3 py-1 font-medium text-emerald-400"
+              >
                 $
                 {Number(profile.balance).toLocaleString("ru-RU", {
                   maximumFractionDigits: 0,
                 })}
-              </span>
+              </Link>
               <SignOutButton />
             </>
           ) : (
@@ -74,6 +84,14 @@ export async function Header() {
             </Link>
           )}
         </div>
+
+        <MobileNav
+          links={navLinks}
+          isLoggedIn={!!user}
+          userEmail={user?.email}
+          displayName={profile?.display_name}
+          balance={profile?.balance != null ? Number(profile.balance) : null}
+        />
       </div>
     </header>
   );

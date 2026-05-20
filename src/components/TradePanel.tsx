@@ -205,7 +205,7 @@ export function TradePanel({
             key={d}
             type="button"
             onClick={() => setDirection(d)}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition ${
+            className={`flex-1 rounded-lg py-3 text-sm font-medium transition sm:py-2.5 ${
               direction === d
                 ? "bg-white text-zinc-900"
                 : "bg-zinc-800 text-zinc-400 hover:text-white"
@@ -222,7 +222,7 @@ export function TradePanel({
             key={outcome.outcome_key}
             type="button"
             onClick={() => onSideChange(outcome.outcome_key)}
-            className={`min-w-[7rem] flex-1 rounded-lg py-2.5 text-sm font-medium ${
+            className={`min-w-0 flex-1 rounded-lg px-2 py-3 text-sm font-medium sm:min-w-[7rem] sm:py-2.5 ${
               side === outcome.outcome_key
                 ? "bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40"
                 : "bg-zinc-800 text-zinc-400"

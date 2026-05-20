@@ -24,7 +24,7 @@ export function AccountNav() {
 
   return (
     <nav
-      className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+      className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden"
       aria-label="Кабинет"
     >
       {links.map(({ href, label, exact }) => {
@@ -33,7 +33,7 @@ export function AccountNav() {
           <Link
             key={href}
             href={href}
-            className={`shrink-0 rounded-md px-3 py-2 text-sm transition-colors lg:w-full ${
+            className={`shrink-0 rounded-md px-3 py-2.5 text-sm transition-colors lg:w-full lg:py-2 ${
               active
                 ? "bg-emerald-500/15 font-medium text-emerald-400"
                 : "text-zinc-400 hover:bg-zinc-800/90 hover:text-zinc-100"

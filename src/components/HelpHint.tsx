@@ -52,7 +52,7 @@ export function HelpHint({
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-zinc-700/80 text-[9px] font-medium leading-none text-zinc-500 transition hover:border-zinc-600 hover:text-zinc-400"
+        className="flex h-5 w-5 items-center justify-center rounded-full border border-zinc-700/80 text-[10px] font-medium leading-none text-zinc-500 transition hover:border-zinc-600 hover:text-zinc-400 sm:h-3.5 sm:w-3.5 sm:text-[9px]"
       >
         ?
       </button>
@@ -60,7 +60,7 @@ export function HelpHint({
         <div
           id={tooltipId}
           role="tooltip"
-          className={`absolute top-[calc(100%+5px)] z-50 w-52 rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-2 text-left text-[11px] leading-snug text-zinc-400 shadow-md ${alignClass}`}
+          className={`absolute top-[calc(100%+5px)] z-50 max-w-[min(13rem,calc(100vw-2rem))] rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-2 text-left text-[11px] leading-snug text-zinc-400 shadow-md sm:w-52 sm:max-w-none ${alignClass}`}
           onClick={(e) => e.stopPropagation()}
         >
           {children}

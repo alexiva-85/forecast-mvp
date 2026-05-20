@@ -49,7 +49,7 @@ export function MarketCatalogFilters({
         ))}
       </div>
 
-      <form method="get" className="flex flex-wrap gap-2">
+      <form method="get" className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {category !== "all" && (
           <input type="hidden" name="category" value={category} />
         )}
@@ -61,20 +61,22 @@ export function MarketCatalogFilters({
           placeholder="Поиск по названию и описанию…"
           className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600"
         />
-        <button
-          type="submit"
-          className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-        >
-          Найти
-        </button>
-        {(q || tag) && (
-          <Link
-            href={hrefFor({ q: "", tag: "" })}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 hover:text-white"
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            className="min-h-11 flex-1 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 sm:flex-none"
           >
-            Сбросить
-          </Link>
-        )}
+            Найти
+          </button>
+          {(q || tag) && (
+            <Link
+              href={hrefFor({ q: "", tag: "" })}
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 hover:text-white sm:flex-none"
+            >
+              Сбросить
+            </Link>
+          )}
+        </div>
       </form>
 
       {popularTags.length > 0 && (

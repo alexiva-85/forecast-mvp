@@ -28,11 +28,11 @@ export default async function HomePage({
   const hasFilters = Boolean(q.trim() || tag);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <HomeOnboarding />
 
       <div id="markets" className="mb-8 scroll-mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
           Прогнозные рынки
         </h1>
         <p className="mt-2 text-sm text-zinc-500">

@@ -133,7 +133,7 @@ export default async function MarketPage({
   const outcomeLabels = buildOutcomeLabelMap(market.outcomes);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       {(isDraft || isSandboxHidden) && (
         <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200/90">
           {isDraft
@@ -157,7 +157,7 @@ export default async function MarketPage({
         )}
       </div>
 
-      <h1 className="text-2xl font-semibold leading-tight text-white">
+      <h1 className="text-xl font-semibold leading-tight text-white sm:text-2xl">
         {market.title}
       </h1>
       {market.description && (
@@ -192,8 +192,8 @@ export default async function MarketPage({
         />
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-5">
-        <div className="lg:col-span-3 space-y-6">
+      <div className="mt-6 grid gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-5">
+        <div className="order-2 space-y-6 lg:order-1 lg:col-span-3">
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
             <h2 className="mb-3 text-sm font-medium text-zinc-400">
               {market.outcome_mode === "multi"
@@ -229,7 +229,7 @@ export default async function MarketPage({
           />
         </div>
 
-        <div className="lg:col-span-2 space-y-4">
+        <div className="order-1 space-y-4 lg:order-2 lg:col-span-2">
           <TradePanel
             market={market}
             userId={user?.id ?? null}
