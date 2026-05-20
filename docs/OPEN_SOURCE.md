@@ -23,7 +23,7 @@
 | Репозиторий | Назначение для Forecast | Когда подключать | Лицензия |
 |-------------|----------------------|------------------|----------|
 | [Polymarket/ctf-exchange](https://github.com/Polymarket/ctf-exchange) | Биржевой контракт v1, hybrid CLOB settlement | E5 testnet | MIT |
-| [Polymarket/ctf-exchange-v2](https://github.com/Polymarket/ctf-exchange-v2) | V2: builder field, fee layer | E5 (предпочтительно v2) | Проверить LICENSE в repo |
+| [Polymarket/ctf-exchange-v2](https://github.com/Polymarket/ctf-exchange-v2) | V2: fee на матче, builder, pUSD | E5 — pin **v1.0.6** (2026-05-08) | MIT |
 | [gnosis/conditional-tokens-contracts](https://github.com/gnosis/conditional-tokens-contracts) | ERC1155 доли исходов | E5 | LGPL-3.0 |
 | [Polymarket/uma-ctf-adapter](https://github.com/Polymarket/uma-ctf-adapter) | Резолв через UMA | E6 | MIT |
 | [Polymarket/uma-ctf-adapter-sdk](https://github.com/Polymarket/uma-ctf-adapter-sdk) | Создание рынков on-chain | C2 + E6 | MIT |
@@ -32,8 +32,9 @@
 
 | Репозиторий | Назначение | Ограничение |
 |-------------|------------|-------------|
-| [Polymarket/clob-client-v2](https://github.com/Polymarket/clob-client-v2) | Клиент их CLOB | Только если осознанный hedge/desks **вне РФ**; не ядро продукта |
-| [Polymarket/py-clob-client-v2](https://github.com/Polymarket/py-clob-client-v2) | Python CLOB | То же |
+| [Polymarket/clob-client-v2](https://github.com/Polymarket/clob-client-v2) | CLOB V2 (production с 28.04.2026) | Hedge **вне РФ**; не ядро | v1.0.6 |
+| [Polymarket/py-clob-client-v2](https://github.com/Polymarket/py-clob-client-v2) | Python CLOB V2 | То же | — |
+| [Polymarket/clob-client](https://github.com/Polymarket/clob-client) | CLOB V1 (**deprecated** на prod) | Не использовать в новом коде | v5.8.2 legacy |
 | [Polymarket/rs-clob-client-v2](https://github.com/Polymarket/rs-clob-client-v2) | Rust CLOB | То же |
 | [Polymarket/builder-relayer-client](https://github.com/Polymarket/builder-relayer-client) | Gasless on-chain | Только при интеграции с **их** CLOB как builder |
 | [Polymarket/poly-market-maker](https://github.com/Polymarket/poly-market-maker) | MM-стратегии | Адаптировать под **наш** API/БД (E7) |
@@ -69,6 +70,7 @@
 |--------|-----|---------------|
 | Индекс доки Polymarket | https://docs.polymarket.com/llms.txt | Полный список страниц для агента |
 | CTF overview | https://docs.polymarket.com/trading/ctf/overview | Модель долей |
+| CLOB V2 migration | https://docs.polymarket.com/v2-migration | Обязательно перед E5 |
 | CLOB intro | https://docs.polymarket.com/developers/CLOB/introduction | Понимание hybrid CLOB (для E5) |
 | Geoblock | https://docs.polymarket.com/api-reference/geoblock | Почему не строим на их CLOB для РФ |
 | Gamma OpenAPI | https://docs.polymarket.com/api-spec/gamma-openapi.yaml | Read-only каталог (C6) |
@@ -110,4 +112,4 @@
 
 ---
 
-*Версия реестра: 2026-05-16*
+*Версия реестра: 2026-05-20 (research pass, CLOB V2)*

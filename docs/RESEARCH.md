@@ -125,7 +125,9 @@ gh release list -R Polymarket/clob-client-v2 --limit 3
 
 | Дата | Файл | Краткий итог |
 |------|------|--------------|
-| 2026-05-16 | *(начальная фиксация)* | MVP v0 on Supabase; OSS реестр создан; Polymarket только как референс |
+| 2026-05-16 | [2026-05-16.md](./research/2026-05-16.md) | MVP v0 on Supabase; OSS реестр; Polymarket — референс |
+| 2026-05-18 | [2026-05-18.md](./research/2026-05-18.md) | B7 multi-outcome off-chain; neg-risk отложен |
+| 2026-05-20 | [2026-05-20.md](./research/2026-05-20.md) | CLOB/CTF V2 live (28.04); ctf-exchange-v2 v1.0.6; E5 prep |
 
 ---
 
