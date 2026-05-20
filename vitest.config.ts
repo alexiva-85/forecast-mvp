@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   test: {
+    exclude: ["**/node_modules/**", "**/contracts/vendor/**"],
     fileParallelism: false,
     testTimeout: 45_000,
     hookTimeout: 45_000,

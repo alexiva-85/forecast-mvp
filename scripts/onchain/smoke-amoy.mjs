@@ -60,6 +60,7 @@ async function main() {
     ["ctfExchange", c.ctfExchange],
     ["conditionalTokens", c.conditionalTokens],
     ["collateralToken", c.collateralToken],
+    ["umaCtfAdapter", c.umaCtfAdapter],
   ];
 
   for (const [name, address] of checks) {

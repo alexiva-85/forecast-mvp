@@ -43,7 +43,7 @@ Neg-risk markets: отдельный `verifyingContract` (`negRiskCtfExchange`).
 | Matcher, ledger, fee | PostgreSQL (`done`, B6/F1) |
 | Подпись ордеров V2 | Заготовка `src/lib/onchain/bridge-stub.ts` |
 | `matchOrders` on-chain | E5+ / отдельный operator-сервис |
-| Резолв | E6 (`uma-ctf-adapter`) |
+| Резолв | E6 — [E6.md](./E6.md) (`uma-ctf-adapter` v3.1.0 Amoy) |
 
 ## Smoke (минимум)
 

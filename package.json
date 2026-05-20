@@ -15,7 +15,8 @@
     "test:watch": "bash scripts/test.sh --watch",
     "onchain:vendor": "bash scripts/onchain/vendor-sync.sh",
     "onchain:deploy:exchange": "bash scripts/onchain/deploy-exchange.sh",
-    "onchain:smoke": "node scripts/onchain/smoke-amoy.mjs"
+    "onchain:smoke": "node scripts/onchain/smoke-amoy.mjs",
+    "onchain:uma:init": "node scripts/onchain/init-uma-condition.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.53.1",
@@ -26,6 +27,8 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@polymarket/uma-ctf-adapter-sdk": "0.0.10",
+    "ethers": "^5.8.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

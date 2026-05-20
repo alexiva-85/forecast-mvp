@@ -7,8 +7,10 @@ import { parseChecklist, type MarketStatus } from "@/lib/types";
 import { AdminMarketSlug } from "@/components/admin/AdminMarketSlug";
 import { AdminMarketCloseButton } from "@/components/admin/AdminMarketCloseButton";
 import { AdminResolvePanel } from "@/components/admin/AdminResolvePanel";
+import { AdminOnchainPanel } from "@/components/admin/AdminOnchainPanel";
 import { ResolutionAudit } from "@/components/ResolutionAudit";
 import { adminStatusLabel } from "@/lib/admin";
+import { marketOnchainLinkFromRow } from "@/lib/onchain/market-link";
 
 export default async function AdminResolveMarketPage({
   params,
@@ -58,6 +60,16 @@ export default async function AdminResolveMarketPage({
           proofUrl={market.resolve_proof_url}
           resolvedAt={market.resolved_at}
         />
+        <AdminOnchainPanel
+          marketId={market.id}
+          slug={market.slug}
+          marketStatus={market.status}
+          link={marketOnchainLinkFromRow(market)}
+          outcomes={outcomes}
+          resolvedOutcomeKey={
+            market.resolved_outcome_key ?? market.resolved_side
+          }
+        />
       </section>
     );
   }
@@ -100,6 +112,13 @@ export default async function AdminResolveMarketPage({
       <Link href="/admin/resolve" className="text-xs text-zinc-500 hover:text-white">
         ← Очередь резолва
       </Link>
+      <AdminOnchainPanel
+        marketId={market.id}
+        slug={market.slug}
+        marketStatus={market.status}
+        link={marketOnchainLinkFromRow(market)}
+        outcomes={outcomes}
+      />
       <AdminResolvePanel
         marketId={market.id}
         slug={market.slug}

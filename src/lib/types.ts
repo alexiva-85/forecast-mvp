@@ -32,6 +32,20 @@ export interface Market {
   resolve_proof_url?: string | null;
   resolved_at?: string | null;
   resolved_by?: string | null;
+  onchain_condition_id?: string | null;
+  onchain_question_id?: string | null;
+  onchain_adapter_version?: string | null;
+  onchain_init_tx_hash?: string | null;
+  onchain_init_at?: string | null;
+  onchain_resolve_status?:
+    | "none"
+    | "pending_uma"
+    | "ready_onchain"
+    | "resolved_onchain"
+    | "skipped";
+  onchain_resolve_tx_hash?: string | null;
+  onchain_resolve_at?: string | null;
+  onchain_resolve_note?: string | null;
   created_at: string;
 }
 

@@ -192,6 +192,60 @@ export async function adminResolveMarket(
     revalidatePath("/");
     revalidatePath(`/market/${slug}`);
     revalidatePath("/admin");
+    revalidatePath(`/admin/resolve/${slug}`);
+    return { success: true };
+  });
+}
+
+export async function adminLinkMarketOnchain(
+  marketId: string,
+  input: {
+    conditionId: string;
+    questionId: string;
+    initTxHash?: string;
+  },
+) {
+  return withSentryServerAction("adminLinkMarketOnchain", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_link_market_onchain", {
+      p_market_id: marketId,
+      p_condition_id: input.conditionId.trim(),
+      p_question_id: input.questionId.trim(),
+      p_init_tx_hash: input.initTxHash?.trim() || null,
+    });
+    if (error) return { error: mapAdminError(error.message) };
+    revalidatePath("/admin/resolve");
+    revalidatePath("/admin/markets");
+    return { success: true };
+  });
+}
+
+export async function adminSkipMarketOnchain(marketId: string) {
+  return withSentryServerAction("adminSkipMarketOnchain", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_skip_market_onchain", {
+      p_market_id: marketId,
+    });
+    if (error) return { error: mapAdminError(error.message) };
+    revalidatePath("/admin/resolve");
+    return { success: true };
+  });
+}
+
+export async function adminMarkOnchainResolved(
+  marketId: string,
+  input?: { resolveTxHash?: string; note?: string },
+) {
+  return withSentryServerAction("adminMarkOnchainResolved", async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("admin_mark_onchain_resolved", {
+      p_market_id: marketId,
+      p_resolve_tx_hash: input?.resolveTxHash?.trim() || null,
+      p_note: input?.note?.trim() || null,
+    });
+    if (error) return { error: mapAdminError(error.message) };
+    revalidatePath("/admin/resolve");
+    revalidatePath("/admin/markets");
     return { success: true };
   });
 }
@@ -450,6 +504,18 @@ function mapAdminError(message: string): string {
   }
   if (message.includes("Proof URL must start")) {
     return "Ссылка должна начинаться с http:// или https://";
+  }
+  if (message.includes("condition_id must be")) {
+    return "conditionId: формат 0x + 64 hex-символа";
+  }
+  if (message.includes("question_id must be")) {
+    return "questionId: формат 0x + 64 hex-символа";
+  }
+  if (message.includes("Cannot link on-chain after resolve")) {
+    return "Нельзя привязать on-chain после резолва";
+  }
+  if (message.includes("Market has no on-chain condition")) {
+    return "Сначала привяжите conditionId к рынку";
   }
   if (message.includes("Market not found")) {
     return "Рынок не найден";

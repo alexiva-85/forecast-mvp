@@ -123,7 +123,7 @@ Admin SQL/UI resolve               Oracle / UMA adapter / council
 | E3 | Депозит / вывод (фиат или крипто) | `done` (UI + `withdrawal_requests` без PSP; реальные платежи после E2) |
 | E4 | Эскроу / ledger с аудитом | `done` (`balance_ledger`, резерв при выводе, `/admin/withdrawals`, сверка) |
 | E5 | On-chain: deploy CTF + Exchange (testnet) | `done` (Amoy reference + vendor pin + smoke; Forecast Exchange deploy — optional, см. [onchain/E5.md](./onchain/E5.md)) |
-| E6 | Oracle / резолв (UMA adapter или свой) | `planned` |
+| E6 | Oracle / резолв (UMA adapter или свой) | `done` (Amoy UMA v3.1.0 + DB/UI bridge; auto on-chain tx — backlog, см. [onchain/E6.md](./onchain/E6.md)) |
 | E7 | MM-бот / начальная ликвидность | `planned` |
 
 ### Блок F — Рост и монетизация

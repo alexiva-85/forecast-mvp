@@ -5,6 +5,7 @@ import {
   AMOY_REFERENCE,
   getCtfExchangeAddress,
   getEip712ExchangeDomainVersion,
+  getUmaCtfAdapterAddress,
 } from "../src/lib/onchain/addresses";
 import {
   buildBridgeIntent,
@@ -36,6 +37,12 @@ describe("onchain addresses (E5)", () => {
   it("getCtfExchangeAddress defaults to Amoy reference", () => {
     expect(getCtfExchangeAddress()).toBe(AMOY_REFERENCE.contracts.ctfExchange);
     expect(getEip712ExchangeDomainVersion()).toBe("2");
+  });
+
+  it("getUmaCtfAdapterAddress defaults to Amoy reference (E6)", () => {
+    expect(getUmaCtfAdapterAddress()).toBe(
+      "0x2F6f8DA6A21023E62399801945eed1b1975A4e12",
+    );
   });
 });
 

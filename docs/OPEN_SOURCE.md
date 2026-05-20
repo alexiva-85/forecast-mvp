@@ -112,4 +112,13 @@
 
 ---
 
-*Версия реестра: 2026-05-20 (E5 vendor pin + Amoy reference addresses)*
+### Внедрено в репозитории (E6)
+
+| Пакет / репо | Использование |
+|--------------|----------------|
+| `uma-ctf-adapter` v3.1.0 @ `10dd882` | Amoy adapter address, VENDOR.lock |
+| `@polymarket/uma-ctf-adapter-sdk@0.0.10` | devDep: `npm run onchain:uma:init` |
+
+---
+
+*Версия реестра: 2026-05-20 (E5 + E6 Amoy oracle bridge)*

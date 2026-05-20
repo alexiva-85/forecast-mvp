@@ -18,7 +18,13 @@
     "negRiskCtfCollateralAdapter": "0xAdA200001000ef00D07553cEE7006808F895c6F1",
     "proxyFactory": "0xEcA1c266193F03d28517a500007738adfb7754d8",
     "safeFactory": "0xaacFeEa03eb1561C4e67d661e40682Bd20E3541b",
-    "feeReceiver": "0xaD8B9eF8F10b69D03F2B56478256946b500215A0"
+    "feeReceiver": "0xaD8B9eF8F10b69D03F2B56478256946b500215A0",
+    "umaCtfAdapter": "0x2F6f8DA6A21023E62399801945eed1b1975A4e12"
+  },
+  "oracle": {
+    "adapter": "uma-ctf-adapter",
+    "adapterVersion": "v3.1.0",
+    "adapterCommit": "10dd8829d710ed9c2541b4196b463ad0c90546fc"
   },
   "eip712": {
     "exchangeDomainVersion": "2",

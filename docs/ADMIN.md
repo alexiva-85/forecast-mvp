@@ -82,7 +82,8 @@ draft  →  open  →  closed  →  resolved
 |----|--------|--------|
 | A17 | E2E-тесты админ-потоков (Playwright) | Регресс резолва |
 | A18 | Ручное «Закрыть торги» из UI (без SQL) | `done` — RPC `admin_close_market`, кнопка в списке рынков и на экране резолва |
+| A19 | On-chain резолв (UMA): привязка condition, мост с admin resolve | `done` (E6) — панель на `/admin/resolve/[slug]`, RPC `admin_link_market_onchain`; авто-tx — backlog |
 
 ---
 
-*Обновлено: 2026-05-20 (A14)*
+*Обновлено: 2026-05-20 (E6 on-chain bridge)*
